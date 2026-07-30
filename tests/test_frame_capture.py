@@ -1,6 +1,6 @@
 """Tests for the shared raw-frame capture helpers."""
 
-from ecoflow_energy.ecoflow.frame_capture import (
+from ecoflow_energy_test.ecoflow.frame_capture import (
     build_frame_entry,
     is_proto_frame,
     sanitize_frame,

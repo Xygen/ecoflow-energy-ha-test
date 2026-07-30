@@ -11,12 +11,12 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-from ecoflow_energy.ecoflow.cloud_http import EcoFlowHTTPQuota
+from ecoflow_energy_test.ecoflow.cloud_http import EcoFlowHTTPQuota
 
 
 class TestHTTPClientInit:
     def test_default_base_url(self):
-        from ecoflow_energy.ecoflow.const import IOT_API_BASE
+        from ecoflow_energy_test.ecoflow.const import IOT_API_BASE
         from unittest.mock import MagicMock
 
         client = EcoFlowHTTPQuota(
@@ -131,8 +131,8 @@ class TestSignature:
         fixed_nonce = 345164
         fixed_ts = "1700000000000"
 
-        with patch("ecoflow_energy.ecoflow.cloud_http.time") as mock_time, \
-             patch("ecoflow_energy.ecoflow.cloud_http.random") as mock_random:
+        with patch("ecoflow_energy_test.ecoflow.cloud_http.time") as mock_time, \
+             patch("ecoflow_energy_test.ecoflow.cloud_http.random") as mock_random:
             mock_time.time.return_value = 1700000000.0
             mock_random.randint.return_value = fixed_nonce
 
@@ -154,8 +154,8 @@ class TestSignature:
         fixed_nonce = 537642
         fixed_ts = "1700000000000"
 
-        with patch("ecoflow_energy.ecoflow.cloud_http.time") as mock_time, \
-             patch("ecoflow_energy.ecoflow.cloud_http.random") as mock_random:
+        with patch("ecoflow_energy_test.ecoflow.cloud_http.time") as mock_time, \
+             patch("ecoflow_energy_test.ecoflow.cloud_http.random") as mock_random:
             mock_time.time.return_value = 1700000000.0
             mock_random.randint.return_value = fixed_nonce
 
@@ -184,8 +184,8 @@ class TestSignature:
         fixed_nonce = 345164
         fixed_ts = "1671171709428"
 
-        with patch("ecoflow_energy.ecoflow.cloud_http.time") as mock_time, \
-             patch("ecoflow_energy.ecoflow.cloud_http.random") as mock_random:
+        with patch("ecoflow_energy_test.ecoflow.cloud_http.time") as mock_time, \
+             patch("ecoflow_energy_test.ecoflow.cloud_http.random") as mock_random:
             mock_time.time.return_value = 1671171709.428
             mock_random.randint.return_value = fixed_nonce
 
@@ -382,7 +382,7 @@ class TestError1006Handling:
         client = self._make_client(mock_session)
 
         import logging
-        with caplog.at_level(logging.DEBUG, logger="ecoflow_energy.ecoflow.cloud_http"):
+        with caplog.at_level(logging.DEBUG, logger="ecoflow_energy_test.ecoflow.cloud_http"):
             await client.get_quota_all()
             warnings_1 = [r for r in caplog.records if r.levelno == logging.WARNING]
             assert len(warnings_1) == 1
@@ -468,7 +468,7 @@ class TestFullSerialNeverLogged:
         )
         client = self._make_client(mock_session)
 
-        with caplog.at_level(logging.DEBUG, logger="ecoflow_energy.ecoflow.cloud_http"):
+        with caplog.at_level(logging.DEBUG, logger="ecoflow_energy_test.ecoflow.cloud_http"):
             await client.get_quota_all()
 
         self._assert_no_full_sn(caplog)
@@ -487,7 +487,7 @@ class TestFullSerialNeverLogged:
         )
         client = self._make_client(mock_session)
 
-        with caplog.at_level(logging.DEBUG, logger="ecoflow_energy.ecoflow.cloud_http"):
+        with caplog.at_level(logging.DEBUG, logger="ecoflow_energy_test.ecoflow.cloud_http"):
             await client.get_quota_all()
 
         self._assert_no_full_sn(caplog)
@@ -503,8 +503,8 @@ class TestFullSerialNeverLogged:
         client = self._make_client(mock_session)
 
         with (
-            caplog.at_level(logging.DEBUG, logger="ecoflow_energy.ecoflow.cloud_http"),
-            patch("ecoflow_energy.ecoflow.cloud_http.asyncio.sleep", new=AsyncMock()),
+            caplog.at_level(logging.DEBUG, logger="ecoflow_energy_test.ecoflow.cloud_http"),
+            patch("ecoflow_energy_test.ecoflow.cloud_http.asyncio.sleep", new=AsyncMock()),
         ):
             result = await client.get_quota_all()
 
@@ -523,7 +523,7 @@ class TestFullSerialNeverLogged:
         )
         client = self._make_client(mock_session)
 
-        with caplog.at_level(logging.DEBUG, logger="ecoflow_energy.ecoflow.cloud_http"):
+        with caplog.at_level(logging.DEBUG, logger="ecoflow_energy_test.ecoflow.cloud_http"):
             await client.get_quota_all()
 
         self._assert_no_full_sn(caplog)
@@ -532,12 +532,12 @@ class TestFullSerialNeverLogged:
 class TestDeadCodeRemoved:
     def test_no_powerocean_quota_keys(self):
         """POWEROCEAN_QUOTA_KEYS was dead code and must be removed."""
-        source = (REPO_ROOT / "custom_components/ecoflow_energy/ecoflow/cloud_http.py").read_text()
+        source = (REPO_ROOT / "custom_components/ecoflow_energy_test/ecoflow/cloud_http.py").read_text()
         assert "POWEROCEAN_QUOTA_KEYS" not in source
 
     def test_no_get_powerocean_quota(self):
         """get_powerocean_quota was dead code and must be removed."""
-        source = (REPO_ROOT / "custom_components/ecoflow_energy/ecoflow/cloud_http.py").read_text()
+        source = (REPO_ROOT / "custom_components/ecoflow_energy_test/ecoflow/cloud_http.py").read_text()
         assert "get_powerocean_quota" not in source
 
     def test_iot_quota_path_is_only_used_for_writes(self):
@@ -546,7 +546,7 @@ class TestDeadCodeRemoved:
         It was removed once as dead code. Reads must keep using the /quota/all
         endpoint, so guard that the path is reachable from set_quota only.
         """
-        source = (REPO_ROOT / "custom_components/ecoflow_energy/ecoflow/cloud_http.py").read_text()
+        source = (REPO_ROOT / "custom_components/ecoflow_energy_test/ecoflow/cloud_http.py").read_text()
         assert "IOT_QUOTA_PATH" in source
         set_quota_body = source.split("async def set_quota")[1].split("async def")[0]
         assert "IOT_QUOTA_PATH" in set_quota_body

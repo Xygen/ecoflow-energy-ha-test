@@ -1,4 +1,4 @@
-# Contributing to EcoFlow Energy
+# Contributing to EcoFlow Energy Test
 
 Thank you for your interest in contributing to this Home Assistant custom integration for EcoFlow devices. Contributions of all kinds are welcome -- bug reports, feature requests, documentation improvements, and code.
 
@@ -6,14 +6,14 @@ Thank you for your interest in contributing to this Home Assistant custom integr
 
 1. **Python 3.12+** is required.
 
-2. Clone the repository and install dependencies:
+2. Clone your published copy of this test repository and install dependencies:
    ```bash
-   git clone https://github.com/shuette42/ecoflow-energy-ha.git
-   cd ecoflow-energy-ha
+   git clone https://github.com/OWNER/EcoFlow-Energy-Test.git
+   cd EcoFlow-Energy-Test
    pip install paho-mqtt protobuf pytest pytest-homeassistant-custom-component
    ```
 
-3. Optionally, set up a local Home Assistant development environment for end-to-end testing. The integration can be loaded by symlinking `custom_components/ecoflow_energy` into your HA config directory.
+3. Optionally, set up a local Home Assistant development environment for end-to-end testing. The integration can be loaded by symlinking `custom_components/ecoflow_energy_test` into your HA config directory.
 
 ## Running Tests
 
@@ -33,10 +33,10 @@ The test suite contains 550+ tests covering parsers, protocol decoding, API clie
 
 ## Architecture Overview
 
-All integration code lives under `custom_components/ecoflow_energy/`:
+All integration code lives under `custom_components/ecoflow_energy_test/`:
 
 ```
-custom_components/ecoflow_energy/
+custom_components/ecoflow_energy_test/
     __init__.py          # HA setup and teardown
     coordinator/         # DataUpdateCoordinator (HTTP polling + MQTT push), split into focused modules
     config_flow.py       # ConfigFlow and OptionsFlow
@@ -66,7 +66,7 @@ The `ecoflow/` subdirectory contains the core library with no Home Assistant dep
 
 ## Reporting Issues
 
-Please use [GitHub Issues](https://github.com/shuette42/ecoflow-energy-ha/issues) and include:
+Use the Issues page of the GitHub repository where this test fork is published and include:
 
 - **Home Assistant version** and **integration version**
 - **Device type** (PowerOcean, Delta 2 Max, Smart Plug) and firmware version if known
@@ -76,4 +76,5 @@ Please use [GitHub Issues](https://github.com/shuette42/ecoflow-energy-ha/issues
 
 ## Questions
 
-For general questions about setup or usage, open a [Discussion](https://github.com/shuette42/ecoflow-energy-ha/discussions) rather than an issue.
+For general questions about setup or usage, use the Discussions page of the
+repository where this test fork is published.

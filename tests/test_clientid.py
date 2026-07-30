@@ -3,7 +3,7 @@
 import hashlib
 import re
 
-from ecoflow_energy.ecoflow.clientid import BT, generate_client_id
+from ecoflow_energy_test.ecoflow.clientid import BT, generate_client_id
 
 
 def test_generate_client_id_format():

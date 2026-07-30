@@ -1,0 +1,229 @@
+"""Sensor platform for EcoFlow Energy Test."""
+
+from __future__ import annotations
+
+from homeassistant.components.sensor import (
+    RestoreSensor,
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+
+from .const import (
+    DEVICE_TYPE_DELTA,
+    DEVICE_TYPE_DELTA3,
+    DEVICE_TYPE_POWEROCEAN,
+    DEVICE_TYPE_POWERGLOW,
+    DEVICE_TYPE_SMARTPLUG,
+    DEVICE_TYPE_STREAM,
+    DOMAIN,
+    DELTA2MAX_SENSORS,
+    DELTA3_SENSORS,
+    EcoFlowSensorDef,
+    POWEROCEAN_SENSORS,
+    POWERGLOW_SENSORS,
+    SMARTPLUG_SENSORS,
+    STREAM_SENSORS,
+)
+from .coordinator import EcoFlowDeviceCoordinator
+from .entity import EcoFlowWriteGateMixin
+
+# Map string → HA enum
+_STATE_CLASS_MAP = {
+    "measurement": SensorStateClass.MEASUREMENT,
+    "total_increasing": SensorStateClass.TOTAL_INCREASING,
+    "total": SensorStateClass.TOTAL,
+}
+
+_ENTITY_CATEGORY_MAP = {
+    "diagnostic": EntityCategory.DIAGNOSTIC,
+    "config": EntityCategory.CONFIG,
+}
+
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up EcoFlow sensors from a config entry."""
+    coordinators: dict[str, EcoFlowDeviceCoordinator] = hass.data[DOMAIN][entry.entry_id]
+    entities: list[SensorEntity] = []
+
+    for coordinator in coordinators.values():
+        sensor_defs = _get_sensor_defs(coordinator.device_type)
+        for sensor_def in sensor_defs:
+            if sensor_def.enhanced_only and not coordinator.enhanced_mode:
+                continue
+            entities.append(EcoFlowSensor(coordinator, sensor_def))
+
+        # Diagnostic sensors (coordinator properties, not data-driven)
+        entities.append(EcoFlowDiagnosticSensor(coordinator, "mqtt_status"))
+        entities.append(EcoFlowDiagnosticSensor(coordinator, "connection_mode"))
+
+    async_add_entities(entities)
+
+
+class EcoFlowSensor(
+    EcoFlowWriteGateMixin, CoordinatorEntity[EcoFlowDeviceCoordinator], RestoreSensor
+):
+    """An EcoFlow sensor entity with state restore across reloads."""
+
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        coordinator: EcoFlowDeviceCoordinator,
+        definition: EcoFlowSensorDef,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._definition = definition
+        self._attr_unique_id = f"{coordinator.device_sn}_{definition.key}"
+        self._attr_translation_key = definition.key
+        self._attr_native_unit_of_measurement = definition.unit
+        self._attr_icon = definition.icon
+        self._restored_value: float | int | str | None = None
+        self._last_written_value: float | int | str | None = None
+
+        if definition.device_class:
+            self._attr_device_class = SensorDeviceClass(definition.device_class)
+        if definition.state_class:
+            self._attr_state_class = _STATE_CLASS_MAP.get(definition.state_class)
+        if definition.entity_category:
+            self._attr_entity_category = _ENTITY_CATEGORY_MAP.get(definition.entity_category)
+        if definition.suggested_display_precision is not None:
+            self._attr_suggested_display_precision = definition.suggested_display_precision
+        if definition.disabled_by_default:
+            self._attr_entity_registry_enabled_default = False
+        if definition.options:
+            self._attr_options = definition.options
+
+    @property
+    def available(self) -> bool:
+        """Return True if entity is available."""
+        return self.coordinator.device_available and super().available
+
+    async def async_added_to_hass(self) -> None:
+        """Restore last known value when entity is added."""
+        await super().async_added_to_hass()
+        if (last := await self.async_get_last_sensor_data()) and last.native_value is not None:
+            # Enum sensors: discard restored values not in options list.
+            # After migrating from numeric to enum, old values like "0"
+            # or "WORKMODE_SELFUSE" are invalid and would block entity setup.
+            if self._definition.options and str(last.native_value) not in self._definition.options:
+                return
+            self._restored_value = last.native_value
+            self._last_written_value = last.native_value
+            # Seed the energy integrator so a lost or corrupt state file
+            # does not reset totals to zero. set_total is monotonic-guarded,
+            # so a stale restored value can never lower a live total.
+            if self._definition.state_class == "total_increasing" and isinstance(
+                last.native_value, (int, float)
+            ):
+                self.coordinator.seed_energy_total(
+                    self._definition.key, float(last.native_value)
+                )
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device info from coordinator."""
+        return self.coordinator.device_info
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._write_state_if_changed(self.native_value)
+
+    @property
+    def native_value(self) -> float | int | str | None:
+        """Return the sensor value, falling back to restored state.
+
+        A key PRESENT with value None is an explicit clear from the parser
+        (e.g. the inactive Delta 3 remain-time direction) and shows as
+        unknown. Only a MISSING key falls back to the restored value.
+        """
+        data = self.coordinator.data
+        if data is not None and self._definition.key in data:
+            val = data[self._definition.key]
+            if val is None:
+                return None
+            # Enum sensors: a live value outside the options list would make
+            # HA raise ValueError on every state write. Fall back to the
+            # restored value, mirroring the restore-path guard in
+            # async_added_to_hass.
+            if self._definition.options and str(val) not in self._definition.options:
+                return self._restored_value
+            return self._round_value(val)
+        return self._restored_value
+
+    def _round_value(self, val: float | int | str) -> float | int | str:
+        """Round numeric values based on suggested_display_precision."""
+        precision = self._definition.suggested_display_precision
+        if precision is None or not isinstance(val, (int, float)):
+            return val
+        return round(val, precision) if precision > 0 else int(round(val, 0))
+
+
+class EcoFlowDiagnosticSensor(
+    EcoFlowWriteGateMixin, CoordinatorEntity[EcoFlowDeviceCoordinator], SensorEntity
+):
+    """Diagnostic sensor that reads coordinator properties directly."""
+
+    _attr_has_entity_name = True
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
+
+    def __init__(
+        self,
+        coordinator: EcoFlowDeviceCoordinator,
+        key: str,
+    ) -> None:
+        """Initialize the diagnostic sensor."""
+        super().__init__(coordinator)
+        self._key = key
+        self._attr_unique_id = f"{coordinator.device_sn}_{key}"
+        self._attr_translation_key = key
+        self._last_written_value: str | None = None
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device info from coordinator."""
+        return self.coordinator.device_info
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._write_state_if_changed(self.native_value)
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the diagnostic sensor value from coordinator property."""
+        if self._key == "mqtt_status":
+            return self.coordinator.mqtt_status
+        if self._key == "connection_mode":
+            return self.coordinator.connection_mode
+        return None
+
+
+def _get_sensor_defs(device_type: str) -> list[EcoFlowSensorDef]:
+    """Return sensor definitions based on device type."""
+    if device_type == DEVICE_TYPE_DELTA:
+        return DELTA2MAX_SENSORS
+    if device_type == DEVICE_TYPE_DELTA3:
+        return DELTA3_SENSORS
+    if device_type == DEVICE_TYPE_POWEROCEAN:
+        return POWEROCEAN_SENSORS
+    if device_type == DEVICE_TYPE_POWERGLOW:
+        return POWERGLOW_SENSORS
+    if device_type == DEVICE_TYPE_SMARTPLUG:
+        return SMARTPLUG_SENSORS
+    if device_type == DEVICE_TYPE_STREAM:
+        return STREAM_SENSORS
+    return []

@@ -8,12 +8,12 @@ import pytest
 from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ecoflow_energy.const import (
+from custom_components.ecoflow_energy_test.const import (
     DEVICE_TYPE_POWEROCEAN,
     POWEROCEAN_SELECTS,
 )
-from custom_components.ecoflow_energy.coordinator import EcoFlowDeviceCoordinator
-from custom_components.ecoflow_energy.select import (
+from custom_components.ecoflow_energy_test.coordinator import EcoFlowDeviceCoordinator
+from custom_components.ecoflow_energy_test.select import (
     EcoFlowSelect,
     WORK_MODE_TO_INT,
     _get_select_defs,

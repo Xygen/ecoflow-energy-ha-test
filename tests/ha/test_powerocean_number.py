@@ -9,13 +9,13 @@ from homeassistant.core import HomeAssistant
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ecoflow_energy.const import (
+from custom_components.ecoflow_energy_test.const import (
     DEVICE_TYPE_POWEROCEAN,
     DOMAIN,
     POWEROCEAN_NUMBERS,
 )
-from custom_components.ecoflow_energy.coordinator import EcoFlowDeviceCoordinator
-from custom_components.ecoflow_energy.number import (
+from custom_components.ecoflow_energy_test.coordinator import EcoFlowDeviceCoordinator
+from custom_components.ecoflow_energy_test.number import (
     EcoFlowNumber,
     _get_number_defs,
 )
@@ -439,7 +439,7 @@ class TestPowerOceanAppSurplusAutoSync:
     ) -> None:
         coordinator = self._make_coordinator(hass, enhanced_config_entry)
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1000.0,
         ):
             coordinator._maybe_schedule_surplus_sync()
@@ -454,7 +454,7 @@ class TestPowerOceanAppSurplusAutoSync:
         coordinator = self._make_coordinator(hass, enhanced_config_entry)
         coordinator._device_data["ems_backup_ratio_pct"] = 47
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1000.0,
         ):
             coordinator._maybe_schedule_surplus_sync()
@@ -468,7 +468,7 @@ class TestPowerOceanAppSurplusAutoSync:
         coordinator = self._make_coordinator(hass, enhanced_config_entry)
         coordinator._device_data.pop("ems_app_surplus_pct")
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1000.0,
         ):
             coordinator._maybe_schedule_surplus_sync()
@@ -482,7 +482,7 @@ class TestPowerOceanAppSurplusAutoSync:
         coordinator = self._make_coordinator(hass, enhanced_config_entry)
         coordinator._last_app_surplus_sync_ts = 1000.0
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1010.0,  # 10s after last sync, throttle = 30s
         ):
             coordinator._maybe_schedule_surplus_sync()
@@ -496,7 +496,7 @@ class TestPowerOceanAppSurplusAutoSync:
         coordinator = self._make_coordinator(hass, enhanced_config_entry)
         coordinator._last_app_surplus_sync_ts = 1000.0
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1031.0,
         ):
             coordinator._maybe_schedule_surplus_sync()
@@ -511,7 +511,7 @@ class TestPowerOceanAppSurplusAutoSync:
         coordinator = self._make_coordinator(hass, enhanced_config_entry)
         coordinator._last_user_surplus_set_ts = 1000.0
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1002.0,
         ):
             coordinator._maybe_schedule_surplus_sync()
@@ -525,7 +525,7 @@ class TestPowerOceanAppSurplusAutoSync:
         coordinator = self._make_coordinator(hass, enhanced_config_entry)
         coordinator._last_user_surplus_set_ts = 1000.0
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1006.0,
         ):
             coordinator._maybe_schedule_surplus_sync()
@@ -545,7 +545,7 @@ class TestPowerOceanAppSurplusAutoSync:
         coordinator._last_user_surplus_set_ts = 2000.0
         coordinator._last_ems_param_change_ts = 1500.0  # frame older than user SET
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=2010.0,  # past user-grace and throttle
         ):
             coordinator._maybe_schedule_surplus_sync()
@@ -563,7 +563,7 @@ class TestPowerOceanAppSurplusAutoSync:
         coordinator._last_user_surplus_set_ts = 1000.0
         coordinator._last_ems_param_change_ts = 2000.0  # frame newer than user SET
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=2010.0,
         ):
             coordinator._maybe_schedule_surplus_sync()
@@ -579,7 +579,7 @@ class TestPowerOceanAppSurplusAutoSync:
         coordinator = self._make_coordinator(hass, enhanced_config_entry)
         coordinator._device_data["ems_app_surplus_pct"] = "abc"
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1000.0,
         ):
             coordinator._maybe_schedule_surplus_sync()
@@ -597,7 +597,7 @@ class TestPowerOceanAppSurplusAutoSync:
         coordinator = self._make_coordinator(hass, enhanced_config_entry)
         coordinator._device_data["ems_backup_ratio_pct"] = "n/a"
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1000.0,
         ):
             coordinator._maybe_schedule_surplus_sync()
@@ -612,7 +612,7 @@ class TestPowerOceanAppSurplusAutoSync:
         coordinator = self._make_coordinator(hass, enhanced_config_entry)
         coordinator._device_data["ems_discharge_lower_limit_pct"] = "junk"
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1000.0,
         ):
             coordinator._maybe_schedule_surplus_sync()
@@ -630,7 +630,7 @@ class TestPowerOceanAppSurplusAutoSync:
         coordinator = self._make_coordinator(hass, enhanced_config_entry)
         coordinator._last_ems_param_change_ts = 0.0
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=3000.0,
         ):
             coordinator._apply_data({"ems_app_surplus_pct": 47})
@@ -650,7 +650,7 @@ class TestPowerOceanAppSurplusAutoSync:
         coordinator._last_user_surplus_set_ts = 1000.0
         coordinator._last_ems_param_change_ts = 2000.0
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=2010.0,
         ):
             coordinator._maybe_schedule_surplus_sync()
@@ -668,7 +668,7 @@ class TestPowerOceanAppSurplusAutoSync:
         coordinator._last_user_surplus_set_ts = 1000.0
         coordinator._last_ems_param_change_ts = 2000.0
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=2010.0,
         ):
             coordinator._maybe_schedule_surplus_sync()
@@ -686,7 +686,7 @@ class TestPowerOceanAppSurplusAutoSync:
         coordinator = self._make_coordinator(hass, enhanced_config_entry)
         coordinator._last_ems_param_change_ts = 1234.0
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=3000.0,
         ):
             coordinator._apply_data({"ems_backup_ratio_pct": 80})
@@ -715,7 +715,7 @@ class TestPowerOceanAppSurplusAutoSync:
         entity = EcoFlowNumber(coordinator, defn)
         entity.async_write_ha_state = MagicMock()
         with patch(
-            "custom_components.ecoflow_energy.number.time.monotonic",
+            "custom_components.ecoflow_energy_test.number.time.monotonic",
             return_value=2000.0,
         ):
             await entity.async_set_native_value(50.0)

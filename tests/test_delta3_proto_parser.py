@@ -9,20 +9,20 @@ keys against the HTTP path.
 
 from __future__ import annotations
 
-from ecoflow_energy.ecoflow.parsers.delta3_http import parse_delta3_http_quota
-from ecoflow_energy.ecoflow.parsers.delta3_proto import (
+from ecoflow_energy_test.ecoflow.parsers.delta3_http import parse_delta3_http_quota
+from ecoflow_energy_test.ecoflow.parsers.delta3_proto import (
     parse_delta3_cms_heartbeat,
     parse_delta3_display_property,
 )
-from ecoflow_energy.ecoflow.proto.ecocharge_pb2 import (
+from ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import (
     Delta3CmsHeartbeat,
     Delta3DisplayProperty,
 )
-from ecoflow_energy.ecoflow.proto.runtime import (
+from ecoflow_energy_test.ecoflow.proto.runtime import (
     decode_proto_runtime_frame,
     decode_proto_runtime_headers,
 )
-from ecoflow_energy.ecoflow.proto_encoding import (
+from ecoflow_energy_test.ecoflow.proto_encoding import (
     encode_field_bytes,
     encode_field_varint,
 )
@@ -282,7 +282,7 @@ class TestRegistryKeysRemainStable:
     """The PowerOcean entries must keep working after the key change."""
 
     def test_powerocean_energy_stream_still_decodes(self):
-        from ecoflow_energy.ecoflow.proto.ecocharge_pb2 import (
+        from ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import (
             JTS1EnergyStreamReport,
         )
 

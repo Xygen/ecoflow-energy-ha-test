@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ecoflow_energy.const import (
+from custom_components.ecoflow_energy_test.const import (
     DELTA2MAX_BINARY_SENSORS,
     DELTA2MAX_NUMBERS,
     DELTA2MAX_SENSORS,
@@ -32,24 +32,24 @@ from custom_components.ecoflow_energy.const import (
     STREAM_NUMBERS,
     STREAM_SENSORS,
 )
-from custom_components.ecoflow_energy.coordinator import EcoFlowDeviceCoordinator
-from custom_components.ecoflow_energy.sensor import (
+from custom_components.ecoflow_energy_test.coordinator import EcoFlowDeviceCoordinator
+from custom_components.ecoflow_energy_test.sensor import (
     EcoFlowDiagnosticSensor,
     EcoFlowSensor,
     _get_sensor_defs,
 )
-from custom_components.ecoflow_energy.binary_sensor import (
+from custom_components.ecoflow_energy_test.binary_sensor import (
     EcoFlowBinarySensor,
     _get_binary_sensor_defs,
 )
-from custom_components.ecoflow_energy.switch import (
+from custom_components.ecoflow_energy_test.switch import (
     EcoFlowSwitch,
     OPTIMISTIC_LOCK_S,
     SWITCH_COMMANDS_R351 as SWITCH_COMMANDS,
     SWITCH_DECLARATIVE_R351 as SWITCH_DECLARATIVE,
     _get_switch_defs,
 )
-from custom_components.ecoflow_energy.number import (
+from custom_components.ecoflow_energy_test.number import (
     EcoFlowNumber,
     NUMBER_COMMANDS,
     SMARTPLUG_NUMBER_COMMANDS,
@@ -132,7 +132,7 @@ class TestNumberDefsRouting:
         assert _get_number_defs(DEVICE_TYPE_SMARTPLUG) is SMARTPLUG_NUMBERS
 
     def test_powerocean_numbers(self):
-        from custom_components.ecoflow_energy.const import POWEROCEAN_NUMBERS
+        from custom_components.ecoflow_energy_test.const import POWEROCEAN_NUMBERS
         assert _get_number_defs(DEVICE_TYPE_POWEROCEAN) is POWEROCEAN_NUMBERS
 
     def test_stream_numbers(self) -> None:
@@ -946,7 +946,7 @@ class TestEcoFlowNumber:
         """
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 "auth_method": "app",
                 "mode": "enhanced",
@@ -985,7 +985,7 @@ class TestEcoFlowNumber:
         # outer envelope carries cmd_func=254 / cmd_id=17 with field 102=80.
         # cmd_id=17 is the ConfigWrite SET (#98); cmd_id=18 is the device
         # reply/ack id, so a SET emitted on 18 was silently ignored.
-        from custom_components.ecoflow_energy.ecoflow.proto.decoder import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto.decoder import (
             decode_header_message,
         )
 

@@ -15,12 +15,12 @@ from homeassistant.core import HomeAssistant
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ecoflow_energy.const import (
+from custom_components.ecoflow_energy_test.const import (
     DEVICE_TYPE_STREAM,
     STREAM_NUMBERS,
 )
-from custom_components.ecoflow_energy.coordinator import EcoFlowDeviceCoordinator
-from custom_components.ecoflow_energy.number import (
+from custom_components.ecoflow_energy_test.coordinator import EcoFlowDeviceCoordinator
+from custom_components.ecoflow_energy_test.number import (
     EcoFlowNumber,
     _get_number_defs,
 )
@@ -76,7 +76,7 @@ class TestStreamBackupReserveSet:
         # Decode the frame at field level (robust against byte-offset drift):
         # the outer envelope must carry cmd_func=254 / cmd_id=17 (ConfigWrite
         # SET), and the inner pdata field 102 must equal the requested value.
-        from custom_components.ecoflow_energy.ecoflow.proto.decoder import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto.decoder import (
             decode_header_message,
         )
 

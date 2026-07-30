@@ -30,7 +30,7 @@ def _record_threads_before_test():
         if thread not in before and "_run_safe_shutdown_loop" in thread.name:
             thread.join(timeout=5)
 
-from custom_components.ecoflow_energy.const import (  # noqa: E402
+from custom_components.ecoflow_energy_test.const import (  # noqa: E402
     AUTH_METHOD_APP,
     AUTH_METHOD_DEVELOPER,
     CONF_ACCESS_KEY,
@@ -59,7 +59,7 @@ from custom_components.ecoflow_energy.const import (  # noqa: E402
 
 @pytest.fixture(autouse=True)
 def auto_enable_custom_integrations(enable_custom_integrations):
-    """Enable HA to discover custom_components/ecoflow_energy."""
+    """Enable HA to discover custom_components/ecoflow_energy_test."""
     yield
 
 
@@ -126,7 +126,7 @@ def standard_config_entry() -> MockConfigEntry:
     """Create a Standard Mode config entry for a Delta 2 Max."""
     return MockConfigEntry(
         domain=DOMAIN,
-        title="EcoFlow Energy",
+        title="EcoFlow Energy Test",
         data={
             CONF_ACCESS_KEY: "test_access_key",
             CONF_SECRET_KEY: "test_secret_key",
@@ -142,7 +142,7 @@ def enhanced_config_entry() -> MockConfigEntry:
     """Create an Enhanced Mode (app-auth) config entry for a PowerOcean."""
     return MockConfigEntry(
         domain=DOMAIN,
-        title="EcoFlow Energy",
+        title="EcoFlow Energy Test",
         data={
             CONF_AUTH_METHOD: AUTH_METHOD_APP,
             CONF_MODE: MODE_ENHANCED,
@@ -160,7 +160,7 @@ def app_auth_config_entry() -> MockConfigEntry:
     """Create an App-Auth config entry for a PowerOcean."""
     return MockConfigEntry(
         domain=DOMAIN,
-        title="EcoFlow Energy",
+        title="EcoFlow Energy Test",
         data={
             CONF_AUTH_METHOD: AUTH_METHOD_APP,
             CONF_MODE: MODE_ENHANCED,
@@ -177,7 +177,7 @@ def app_auth_config_entry() -> MockConfigEntry:
 def mock_iot_api():
     """Patch IoTApiClient to return mock credentials and devices."""
     with patch(
-        "custom_components.ecoflow_energy.coordinator.setup.IoTApiClient",
+        "custom_components.ecoflow_energy_test.coordinator.setup.IoTApiClient",
     ) as cls:
         instance = cls.return_value
         instance.get_mqtt_credentials = AsyncMock(return_value=MOCK_MQTT_CREDENTIALS)
@@ -195,9 +195,9 @@ def mock_mqtt_client():
     skipped device would otherwise open a real socket.
     """
     with (
-        patch("custom_components.ecoflow_energy.device_probe.EcoFlowMQTTClient"),
+        patch("custom_components.ecoflow_energy_test.device_probe.EcoFlowMQTTClient"),
         patch(
-            "custom_components.ecoflow_energy.coordinator.setup.EcoFlowMQTTClient",
+            "custom_components.ecoflow_energy_test.coordinator.setup.EcoFlowMQTTClient",
         ) as cls,
     ):
         instance = cls.return_value
@@ -220,7 +220,7 @@ def mock_mqtt_client():
 def mock_http_client():
     """Patch EcoFlowHTTPQuota to return mock data."""
     with patch(
-        "custom_components.ecoflow_energy.coordinator.setup.EcoFlowHTTPQuota",
+        "custom_components.ecoflow_energy_test.coordinator.setup.EcoFlowHTTPQuota",
     ) as cls:
         instance = cls.return_value
         instance.get_quota_all = AsyncMock(return_value={
@@ -235,7 +235,7 @@ def mock_http_client():
 def mock_enhanced_auth():
     """Patch AppApiClient to return mock login/credentials for app-auth setup."""
     with patch(
-        "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+        "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
     ) as cls:
         instance = cls.return_value
         instance.login = AsyncMock(return_value=True)

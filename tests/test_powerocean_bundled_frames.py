@@ -6,18 +6,18 @@ from unittest.mock import patch
 
 import pytest
 
-from ecoflow_energy.ecoflow.parsers.powerocean_proto import flatten_heartbeat
-from ecoflow_energy.ecoflow.proto.decoder import decode_header_message
-from ecoflow_energy.ecoflow.proto.ecocharge_pb2 import (
+from ecoflow_energy_test.ecoflow.parsers.powerocean_proto import flatten_heartbeat
+from ecoflow_energy_test.ecoflow.proto.decoder import decode_header_message
+from ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import (
     JTS1EmsHeartbeat,
     JTS1EmsPVInvEnergyStreamReport,
     JTS1EnergyStreamReport,
 )
-from ecoflow_energy.ecoflow.proto.runtime import (
+from ecoflow_energy_test.ecoflow.proto.runtime import (
     decode_proto_runtime_frame,
     decode_proto_runtime_headers,
 )
-from ecoflow_energy.ecoflow.proto_encoding import (
+from ecoflow_energy_test.ecoflow.proto_encoding import (
     encode_field_bytes,
     encode_field_varint,
 )
@@ -360,7 +360,7 @@ def test_invalid_pdata_hex_falls_back_to_full_frame() -> None:
     frame = stream.SerializeToString()
 
     with patch(
-        "ecoflow_energy.ecoflow.proto.runtime.decode_header_message",
+        "ecoflow_energy_test.ecoflow.proto.runtime.decode_header_message",
         return_value=([{"cmd_func": 96, "cmd_id": 33, "pdata": "zznothex"}], None),
     ):
         result = decode_proto_runtime_frame(frame)

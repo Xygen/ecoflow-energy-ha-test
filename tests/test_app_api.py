@@ -4,7 +4,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from ecoflow_energy.ecoflow.app_api import AppApiClient, _parse_device_response
+from ecoflow_energy_test.ecoflow.app_api import (
+    AppApiClient,
+    _parse_device_response,
+    _parse_provider_device_response,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -41,7 +45,7 @@ class TestLogin:
         client, session = _make_client()
 
         with patch(
-            "ecoflow_energy.ecoflow.app_api.enhanced_login",
+            "ecoflow_energy_test.ecoflow.app_api.enhanced_login",
             new_callable=AsyncMock,
             return_value={"token": "jwt_token_123", "user_id": "uid_456"},
         ):
@@ -56,7 +60,7 @@ class TestLogin:
         client, session = _make_client()
 
         with patch(
-            "ecoflow_energy.ecoflow.app_api.enhanced_login",
+            "ecoflow_energy_test.ecoflow.app_api.enhanced_login",
             new_callable=AsyncMock,
             return_value=None,
         ):
@@ -74,7 +78,7 @@ class TestLogin:
         client._user_id = "old_uid"
 
         with patch(
-            "ecoflow_energy.ecoflow.app_api.enhanced_login",
+            "ecoflow_energy_test.ecoflow.app_api.enhanced_login",
             new_callable=AsyncMock,
             return_value=None,
         ):
@@ -103,6 +107,7 @@ class TestGetDeviceList:
                     "HJ3100001": {
                         "deviceName": "My PowerOcean",
                         "productName": "PowerOcean",
+                        "productType": 85,
                         "online": 1,
                     },
                 },
@@ -128,6 +133,7 @@ class TestGetDeviceList:
         assert po["product_name"] == "PowerOcean"
         assert po["online"] == 1
         assert po["device_type"] == "powerocean"
+        assert po["product_type"] == "85"
 
         delta = next(d for d in result if d["sn"] == "R3510002")
         assert delta["product_name"] == "Delta 2 Max"
@@ -251,7 +257,9 @@ class TestNormalizedFieldNames:
         result = _parse_device_response(data)
         assert len(result) == 1
         dev = result[0]
-        assert set(dev.keys()) == {"sn", "product_name", "online", "device_type"}
+        assert set(dev.keys()) == {
+            "sn", "product_name", "product_type", "online", "device_type"
+        }
 
     def test_sn_from_key_when_missing(self):
         """When 'sn' is not in device info, the dict key is used as SN."""
@@ -282,6 +290,77 @@ class TestNormalizedFieldNames:
 
 
 # ===========================================================================
+# PowerOcean consumer reports used by PowerGlow
+# ===========================================================================
+
+
+class TestPowerGlowConsumerReports:
+    def test_provider_list_keeps_parent_sn_and_product_type(self):
+        response = {
+            "data": {
+                "devices": [
+                    {"sn": "HJ3100001", "productType": 85, "deviceName": "PO"},
+                    {"sn": "HF3300001", "productType": 999, "deviceName": "Rod"},
+                ]
+            }
+        }
+        assert _parse_provider_device_response(response) == [
+            {"sn": "HJ3100001", "product_type": "85", "name": "PO"}
+        ]
+
+    @pytest.mark.asyncio
+    async def test_get_powerocean_devices(self):
+        client, session = _make_client()
+        client._token = "valid_token"
+        session.get = MagicMock(return_value=_mock_response({
+            "data": [{"sn": "HJ3100001", "productType": "85"}]
+        }))
+
+        result = await client.get_powerocean_devices()
+
+        assert result[0]["sn"] == "HJ3100001"
+        assert result[0]["product_type"] == "85"
+        assert "/provider-service/user/device/list" in session.get.call_args.args[0]
+
+    @pytest.mark.asyncio
+    async def test_get_device_detail(self):
+        client, session = _make_client()
+        client._token = "valid_token"
+        detail = {
+            "code": "0",
+            "data": {"quota": {"JTS1_HEATING_ROD_PARAM_REPORT": {"heatingPower": 1234}}},
+        }
+        session.get = MagicMock(return_value=_mock_response(detail))
+
+        assert await client.get_device_detail("HJ3100001", "85") == detail
+        _, kwargs = session.get.call_args
+        assert kwargs["params"] == {"sn": "HJ3100001"}
+        assert kwargs["headers"]["product-type"] == "85"
+
+    @pytest.mark.asyncio
+    async def test_get_device_detail_accepts_legacy_parent_without_product_type(self):
+        client, session = _make_client()
+        client._token = "valid_token"
+        detail = {"code": "0", "data": {"quota": {}}}
+        session.get = MagicMock(return_value=_mock_response(detail))
+
+        assert await client.get_device_detail("HJ3100001") == detail
+
+        _, kwargs = session.get.call_args
+        assert kwargs["params"] == {"sn": "HJ3100001"}
+        assert "product-type" not in kwargs["headers"]
+
+    @pytest.mark.asyncio
+    async def test_get_device_detail_rejects_api_error(self):
+        client, session = _make_client()
+        client._token = "valid_token"
+        session.get = MagicMock(return_value=_mock_response({
+            "code": "1006", "message": "not found", "data": {}
+        }))
+        assert await client.get_device_detail("HJ3100001", "85") is None
+
+
+# ===========================================================================
 # MQTT Credentials
 # ===========================================================================
 
@@ -301,7 +380,7 @@ class TestGetMqttCredentials:
         }
 
         with patch(
-            "ecoflow_energy.ecoflow.app_api.get_enhanced_credentials",
+            "ecoflow_energy_test.ecoflow.app_api.get_enhanced_credentials",
             new_callable=AsyncMock,
             return_value=expected_creds,
         ) as mock_get:
@@ -324,7 +403,7 @@ class TestGetMqttCredentials:
         client._token = "valid_token"
 
         with patch(
-            "ecoflow_energy.ecoflow.app_api.get_enhanced_credentials",
+            "ecoflow_energy_test.ecoflow.app_api.get_enhanced_credentials",
             new_callable=AsyncMock,
             return_value=None,
         ):
@@ -344,7 +423,7 @@ class TestRegionRouting:
         client, session = _make_client()
 
         with patch(
-            "ecoflow_energy.ecoflow.app_api.enhanced_login",
+            "ecoflow_energy_test.ecoflow.app_api.enhanced_login",
             new_callable=AsyncMock,
             return_value={
                 "token": "jwt_token_123",
@@ -363,7 +442,7 @@ class TestRegionRouting:
         client, session = _make_client()
 
         with patch(
-            "ecoflow_energy.ecoflow.app_api.enhanced_login",
+            "ecoflow_energy_test.ecoflow.app_api.enhanced_login",
             new_callable=AsyncMock,
             return_value={
                 "token": "jwt_token_123",
@@ -384,7 +463,7 @@ class TestRegionRouting:
         client, session = _make_client()
 
         with patch(
-            "ecoflow_energy.ecoflow.app_api.enhanced_login",
+            "ecoflow_energy_test.ecoflow.app_api.enhanced_login",
             new_callable=AsyncMock,
             return_value={
                 "token": "jwt_token_123",
@@ -395,7 +474,7 @@ class TestRegionRouting:
             await client.login()
 
         with patch(
-            "ecoflow_energy.ecoflow.app_api.get_enhanced_credentials",
+            "ecoflow_energy_test.ecoflow.app_api.get_enhanced_credentials",
             new_callable=AsyncMock,
             return_value={"certificateAccount": "acct"},
         ) as mock_get:
@@ -408,12 +487,12 @@ class TestRegionRouting:
     @pytest.mark.asyncio
     async def test_login_without_base_url_falls_back_to_default(self):
         """A login result without base_url (legacy contract) keeps the EU default."""
-        from ecoflow_energy.ecoflow.const import IOT_API_BASE
+        from ecoflow_energy_test.ecoflow.const import IOT_API_BASE
 
         client, session = _make_client()
 
         with patch(
-            "ecoflow_energy.ecoflow.app_api.enhanced_login",
+            "ecoflow_energy_test.ecoflow.app_api.enhanced_login",
             new_callable=AsyncMock,
             return_value={"token": "jwt_token_123", "user_id": "uid_456"},
         ):

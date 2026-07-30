@@ -2,7 +2,7 @@
 
 import pytest
 
-from ecoflow_energy.ecoflow.energy_stream import (
+from ecoflow_energy_test.ecoflow.energy_stream import (
     build_backup_event_set_payload,
     build_energy_stream_activate_payload,
     build_energy_stream_deactivate_payload,
@@ -13,7 +13,7 @@ from ecoflow_energy.ecoflow.energy_stream import (
     build_stream_backup_reserve_payload,
     build_work_mode_set_payload,
 )
-from ecoflow_energy.ecoflow.proto_encoding import (
+from ecoflow_energy_test.ecoflow.proto_encoding import (
     encode_field_bytes,
     encode_field_varint,
     encode_varint,

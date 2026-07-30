@@ -1,4 +1,4 @@
-"""Tests for EcoFlow Energy integration setup and unload."""
+"""Tests for EcoFlow Energy Test integration setup and unload."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ecoflow_energy.const import (
+from custom_components.ecoflow_energy_test.const import (
     AUTH_METHOD_APP,
     AUTH_METHOD_DEVELOPER,
     CONF_ACCESS_KEY,
@@ -56,7 +56,7 @@ class TestSetupEntry:
         standard_config_entry.add_to_hass(hass)
 
         with patch(
-            "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
+            "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
             new_callable=AsyncMock,
         ):
             result = await hass.config_entries.async_setup(standard_config_entry.entry_id)
@@ -92,11 +92,11 @@ class TestSetupEntry:
 
         with (
             patch(
-                "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+                "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
                 return_value=mock_app_api,
             ),
             patch(
-                "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
+                "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
                 new_callable=AsyncMock,
             ),
         ):
@@ -137,7 +137,7 @@ class TestPartialSetupCleanup:
         }
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_ACCESS_KEY: "test_access_key",
                 CONF_SECRET_KEY: "test_secret_key",
@@ -169,11 +169,11 @@ class TestPartialSetupCleanup:
 
         with (
             patch(
-                "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
+                "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
                 autospec=True,
             ) as mock_refresh,
             patch(
-                "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_shutdown",
+                "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_shutdown",
                 shutdown_mock,
             ),
         ):
@@ -205,7 +205,7 @@ class TestUnloadEntry:
         standard_config_entry.add_to_hass(hass)
 
         with patch(
-            "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
+            "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
             new_callable=AsyncMock,
         ):
             await hass.config_entries.async_setup(standard_config_entry.entry_id)
@@ -231,7 +231,7 @@ class TestMigration:
         """Migration from v1 to v3 adds auth_method=developer."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_ACCESS_KEY: "old_ak",
                 CONF_SECRET_KEY: "old_sk",
@@ -243,7 +243,7 @@ class TestMigration:
         )
         entry.add_to_hass(hass)
 
-        from custom_components.ecoflow_energy import async_migrate_entry
+        from custom_components.ecoflow_energy_test import async_migrate_entry
 
         result = await async_migrate_entry(hass, entry)
         assert result is True
@@ -254,7 +254,7 @@ class TestMigration:
         """Migration from v2 to v3 adds auth_method if missing."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_ACCESS_KEY: "ak",
                 CONF_SECRET_KEY: "sk",
@@ -266,7 +266,7 @@ class TestMigration:
         )
         entry.add_to_hass(hass)
 
-        from custom_components.ecoflow_energy import async_migrate_entry
+        from custom_components.ecoflow_energy_test import async_migrate_entry
 
         result = await async_migrate_entry(hass, entry)
         assert result is True
@@ -277,7 +277,7 @@ class TestMigration:
         """V3 entries are not migrated."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_DEVELOPER,
                 CONF_ACCESS_KEY: "ak",
@@ -290,7 +290,7 @@ class TestMigration:
         )
         entry.add_to_hass(hass)
 
-        from custom_components.ecoflow_energy import async_migrate_entry
+        from custom_components.ecoflow_energy_test import async_migrate_entry
 
         result = await async_migrate_entry(hass, entry)
         assert result is True
@@ -311,8 +311,8 @@ class TestUnsupportedDeviceSkip:
         """Devices with unknown device_type are skipped during setup."""
         unsupported_device = {
             "sn": "XY99ZZ1234500001",
-            "name": "PowerGlow",
-            "product_name": "PowerGlow",
+            "name": "Unknown EcoFlow Accessory",
+            "product_name": "Unknown EcoFlow Accessory",
             "device_type": "unknown",
             "online": 1,
         }
@@ -320,7 +320,7 @@ class TestUnsupportedDeviceSkip:
 
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -343,11 +343,11 @@ class TestUnsupportedDeviceSkip:
 
         with (
             patch(
-                "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+                "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
                 return_value=mock_app_api,
             ),
             patch(
-                "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
+                "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
                 new_callable=AsyncMock,
             ),
         ):
@@ -377,7 +377,7 @@ class TestUnsupportedDeviceSkip:
 
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -400,11 +400,11 @@ class TestUnsupportedDeviceSkip:
 
         with (
             patch(
-                "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+                "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
                 return_value=mock_app_api,
             ),
             patch(
-                "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
+                "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
                 new_callable=AsyncMock,
             ),
         ):
@@ -430,7 +430,7 @@ class TestUnsupportedDeviceSkip:
 
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -453,11 +453,11 @@ class TestUnsupportedDeviceSkip:
 
         with (
             patch(
-                "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+                "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
                 return_value=mock_app_api,
             ),
             patch(
-                "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
+                "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
                 new_callable=AsyncMock,
             ),
         ):
@@ -485,7 +485,7 @@ class TestUnsupportedDeviceSkip:
 
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -511,11 +511,11 @@ class TestUnsupportedDeviceSkip:
 
         with (
             patch(
-                "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+                "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
                 return_value=mock_app_api,
             ),
             patch(
-                "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
+                "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
                 new_callable=AsyncMock,
             ),
         ):
@@ -555,7 +555,7 @@ class TestUnsupportedDeviceSkip:
 
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -578,11 +578,11 @@ class TestUnsupportedDeviceSkip:
 
         with (
             patch(
-                "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+                "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
                 return_value=mock_app_api,
             ),
             patch(
-                "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
+                "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
                 new_callable=AsyncMock,
             ),
         ):
@@ -619,7 +619,7 @@ class TestDeltaThreeReclassification:
 
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_ACCESS_KEY: "test_access_key",
                 CONF_SECRET_KEY: "test_secret_key",
@@ -631,7 +631,7 @@ class TestDeltaThreeReclassification:
         entry.add_to_hass(hass)
 
         with patch(
-            "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
+            "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
             new_callable=AsyncMock,
         ):
             result = await hass.config_entries.async_setup(entry.entry_id)
@@ -665,7 +665,7 @@ class TestDeltaThreeReclassification:
 
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_ACCESS_KEY: "test_access_key",
                 CONF_SECRET_KEY: "test_secret_key",
@@ -677,7 +677,7 @@ class TestDeltaThreeReclassification:
         entry.add_to_hass(hass)
 
         with patch(
-            "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
+            "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
             new_callable=AsyncMock,
         ):
             result = await hass.config_entries.async_setup(entry.entry_id)
@@ -709,11 +709,11 @@ class TestAppAuthSetup:
 
         with (
             patch(
-                "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+                "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
                 return_value=mock_app_api,
             ),
             patch(
-                "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
+                "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
                 new_callable=AsyncMock,
             ),
         ):
@@ -735,7 +735,7 @@ class TestAppAuthSetup:
         """Enhanced Mode entry with email+pw auto-upgrades to auth_type=app."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_DEVELOPER,
                 CONF_ACCESS_KEY: "ak",
@@ -760,11 +760,11 @@ class TestAppAuthSetup:
 
         with (
             patch(
-                "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+                "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
                 return_value=mock_app_api,
             ),
             patch(
-                "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
+                "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
                 new_callable=AsyncMock,
             ),
         ):
@@ -787,7 +787,7 @@ class TestAppAuthSetup:
         standard_config_entry.add_to_hass(hass)
 
         with patch(
-            "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
+            "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
             new_callable=AsyncMock,
         ):
             await hass.config_entries.async_setup(standard_config_entry.entry_id)
@@ -833,7 +833,7 @@ class TestUnroutedDeviceProbeWiring:
             )
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data=data,
             unique_id="test@example.com",
         )
@@ -847,7 +847,7 @@ class TestUnroutedDeviceProbeWiring:
         entry = self._entry(hass, AUTH_METHOD_APP, raw_capture=None)
 
         with patch(
-            "custom_components.ecoflow_energy.async_start_probes",
+            "custom_components.ecoflow_energy_test.async_start_probes",
             new_callable=AsyncMock,
         ) as mock_start:
             assert await hass.config_entries.async_setup(entry.entry_id) is True
@@ -870,7 +870,7 @@ class TestUnroutedDeviceProbeWiring:
         assert CONF_RAW_CAPTURE not in entry.data
 
         with patch(
-            "custom_components.ecoflow_energy.async_start_probes",
+            "custom_components.ecoflow_energy_test.async_start_probes",
             new_callable=AsyncMock,
         ) as mock_start:
             assert await hass.config_entries.async_setup(entry.entry_id) is True
@@ -894,9 +894,9 @@ class TestUnroutedDeviceProbeWiring:
         probe.async_stop = AsyncMock()
 
         with (
-            patch("custom_components.ecoflow_energy.time.time", return_value=FIXED_NOW),
+            patch("custom_components.ecoflow_energy_test.time.time", return_value=FIXED_NOW),
             patch(
-                "custom_components.ecoflow_energy.async_start_probes",
+                "custom_components.ecoflow_energy_test.async_start_probes",
                 new_callable=AsyncMock,
                 return_value=[probe],
             ),
@@ -923,9 +923,9 @@ class TestUnroutedDeviceProbeWiring:
         )
 
         with (
-            patch("custom_components.ecoflow_energy.time.time", return_value=FIXED_NOW),
+            patch("custom_components.ecoflow_energy_test.time.time", return_value=FIXED_NOW),
             patch(
-                "custom_components.ecoflow_energy.async_start_probes",
+                "custom_components.ecoflow_energy_test.async_start_probes",
                 new_callable=AsyncMock,
             ) as mock_start,
         ):
@@ -947,9 +947,9 @@ class TestUnroutedDeviceProbeWiring:
         probe.async_stop = AsyncMock()
 
         with (
-            patch("custom_components.ecoflow_energy.time.time", return_value=FIXED_NOW),
+            patch("custom_components.ecoflow_energy_test.time.time", return_value=FIXED_NOW),
             patch(
-                "custom_components.ecoflow_energy.async_start_probes",
+                "custom_components.ecoflow_energy_test.async_start_probes",
                 new_callable=AsyncMock,
                 return_value=[probe],
             ) as mock_start,
@@ -972,7 +972,7 @@ class TestUnroutedDeviceProbeWiring:
         """Standard mode has the raw quota route and needs no listener."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_DEVELOPER,
                 CONF_MODE: MODE_STANDARD,
@@ -985,7 +985,7 @@ class TestUnroutedDeviceProbeWiring:
         entry.add_to_hass(hass)
 
         with patch(
-            "custom_components.ecoflow_energy.async_start_probes",
+            "custom_components.ecoflow_energy_test.async_start_probes",
             new_callable=AsyncMock,
         ) as mock_start:
             assert await hass.config_entries.async_setup(entry.entry_id) is True

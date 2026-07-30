@@ -72,3 +72,11 @@ scripts/
 # Match files with any extension and whole output directories, not just .json.
 probe_output_*
 probe_output_*/
+
+# Local test dependencies and generated packaging files
+.builddeps*/
+.runtestdeps/
+.testdeps/
+.tmp/
+get-pip.py
+*.zip

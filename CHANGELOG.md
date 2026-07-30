@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.15.1] - 2026-07-29
+
+### Added
+- Read-only PowerGlow support for the confirmed HF33 serial family. The integration exposes heating and target power, current and target water temperature, PV/grid/battery contribution, tank volume, self-check progress, raw numeric state diagnostics, and locally integrated heating energy. `heatingPower` and `hrPwr` feed the same heating-power sensor; the energy-stream value takes precedence when both reports are present.
+- Enhanced-mode PowerGlow report polling through the PowerOcean parent using the EcoFlow consumer API. Known `JTS1_HEATING_ROD_PARAM_REPORT` and `JTS1_HEATING_ROD_ENERGY_STREAM_REPORT` values are associated through `hrSn`. Direct HF33 frames remain diagnostics-only until their protocol is verified; no PowerGlow write command is sent.
+
+### Fixed
+- The test integration now owns a uniquely named and namespaced Protobuf schema, so it can be loaded in the same Home Assistant process as the original `ecoflow_energy` integration without `duplicate file name ecocharge.proto` failures.
+- Developer/TCP MQTT now uses a test-domain-specific client ID, preventing the original and test integrations from disconnecting each other when both monitor the same device.
+- App-auth devices no longer become unavailable at the first five-second health check while waiting for their first parsed frame. They now progress through the existing freshness thresholds and become unavailable only after the full hard timeout.
+- PowerGlow transport traffic and parsed telemetry freshness are tracked separately: diagnostics-only HF33 frames keep a healthy WSS session from reconnecting in a loop, while entities still become unavailable when no parsed MQTT or app-detail data arrives.
+- PowerGlow parent discovery merges configured and account-discovered PowerOcean devices and retries after temporary discovery failures. Energy-stream entries are selected per `hrSn`, including multi-heating-rod reports, before `hrPwr` replaces the parameter-report fallback.
+- Corrected the German translation file encoding and removed HACS/install links that pointed to the original integration instead of this independently published test fork.
+
 ## [1.15.0] - 2026-07-29
 
 ### Added
@@ -74,7 +88,7 @@ All notable changes to this project will be documented in this file.
 - `number.min_discharge_soc` (legacy) - sent only 2 of the 3 fields the device requires, causing writes to be silently ignored. Use the new `number.backup_reserve` instead. The wire field and read sensor are unchanged; only the entity name and range (was 0-30%, now 0-100%) differ. (beta.1)
 
 ### Migration
-- After upgrade, the old `number.ecoflow_powerocean_min_entladezustand` (DE) / `min_discharge_soc` (EN) entity will appear as "unavailable" in HA. It is safe to delete via Settings → Devices & Services → EcoFlow Energy → ⋮ → Delete on the entity. Any automation referencing it should be updated to use `number.ecoflow_powerocean_backup_reserve` instead.
+- After upgrade, the old `number.ecoflow_powerocean_min_entladezustand` (DE) / `min_discharge_soc` (EN) entity will appear as "unavailable" in HA. It is safe to delete via Settings → Devices & Services → EcoFlow Energy Test → ⋮ → Delete on the entity. Any automation referencing it should be updated to use `number.ecoflow_powerocean_backup_reserve` instead.
 
 ## [1.12.0] - 2026-04-22
 
@@ -386,7 +400,7 @@ All notable changes to this project will be documented in this file.
 ## [1.3.1] - 2026-03-29
 
 ### Added
-- Reconfigure flow — update API credentials via Settings > Integrations > EcoFlow Energy > Reconfigure
+- Reconfigure flow — update API credentials via Settings > Integrations > EcoFlow Energy Test > Reconfigure
 - Entity availability tracking — entities show "unavailable" when device is unreachable
 - Optimistic state update for number entities (charge speed, SoC limits)
 - `suggested_display_precision` for all sensors — cleaner UI values

@@ -1,6 +1,6 @@
 """Tests for the Delta 2 Max JSON report parser."""
 
-from ecoflow_energy.ecoflow.parsers.delta import (
+from ecoflow_energy_test.ecoflow.parsers.delta import (
     DELTA2MAX_FIELD_MAP,
     parse_delta_report,
 )

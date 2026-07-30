@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from ecoflow_energy.ecoflow.iot_api import IoTApiClient
+from ecoflow_energy_test.ecoflow.iot_api import IoTApiClient
 
 
 # ---------------------------------------------------------------------------
@@ -102,7 +102,7 @@ class TestSignedHeaders:
 
 class TestBaseURL:
     def test_default_base_url(self):
-        from ecoflow_energy.ecoflow.const import IOT_API_BASE
+        from ecoflow_energy_test.ecoflow.const import IOT_API_BASE
 
         client, _ = _make_client()
         assert client._base_url == IOT_API_BASE

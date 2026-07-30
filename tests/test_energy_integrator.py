@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
-from ecoflow_energy.ecoflow.energy_integrator import EnergyIntegrator
+from ecoflow_energy_test.ecoflow.energy_integrator import EnergyIntegrator
 
 
 @pytest.fixture
@@ -165,7 +165,7 @@ class TestPersistence:
 
         # Simulate post-reboot: monotonic is ~10s (fresh boot)
         with patch(
-            "ecoflow_energy.ecoflow.energy_integrator.time.monotonic",
+            "ecoflow_energy_test.ecoflow.energy_integrator.time.monotonic",
             return_value=10.0,
         ):
             integrator = EnergyIntegrator(state_file)
@@ -188,7 +188,7 @@ class TestPersistence:
 
         # Load with post-reboot monotonic
         with patch(
-            "ecoflow_energy.ecoflow.energy_integrator.time.monotonic",
+            "ecoflow_energy_test.ecoflow.energy_integrator.time.monotonic",
             return_value=100.0,
         ):
             integrator = EnergyIntegrator(state_file)
@@ -196,7 +196,7 @@ class TestPersistence:
 
         # First integrate call after load: 30s later at 1000W
         with patch(
-            "ecoflow_energy.ecoflow.energy_integrator.time.monotonic",
+            "ecoflow_energy_test.ecoflow.energy_integrator.time.monotonic",
             return_value=130.0,
         ):
             result = integrator.integrate("solar", 1000.0)
@@ -213,7 +213,7 @@ class TestPersistence:
         Path(state_file).write_text(json.dumps(data))
 
         with patch(
-            "ecoflow_energy.ecoflow.energy_integrator.time.monotonic",
+            "ecoflow_energy_test.ecoflow.energy_integrator.time.monotonic",
             return_value=200.0,
         ):
             integrator = EnergyIntegrator(state_file)
@@ -260,7 +260,7 @@ class TestPlausibilityBounds:
         """A 1e28 W reading was observed while the Plus payload was misdecoded."""
         integrator._state["solar"] = (12.5, 1000.0, 500.0)
         with patch(
-            "ecoflow_energy.ecoflow.energy_integrator.time.monotonic",
+            "ecoflow_energy_test.ecoflow.energy_integrator.time.monotonic",
             return_value=1030.0,
         ):
             result = integrator.integrate("solar", 1e28)
@@ -270,7 +270,7 @@ class TestPlausibilityBounds:
     def test_integrate_rejects_infinite_power(self, integrator):
         integrator._state["solar"] = (12.5, 1000.0, 500.0)
         with patch(
-            "ecoflow_energy.ecoflow.energy_integrator.time.monotonic",
+            "ecoflow_energy_test.ecoflow.energy_integrator.time.monotonic",
             return_value=1030.0,
         ):
             result = integrator.integrate("solar", float("inf"))
@@ -280,7 +280,7 @@ class TestPlausibilityBounds:
         """The guard must not disturb ordinary integration."""
         integrator._state["solar"] = (0.0, 1000.0, 1000.0)
         with patch(
-            "ecoflow_energy.ecoflow.energy_integrator.time.monotonic",
+            "ecoflow_energy_test.ecoflow.energy_integrator.time.monotonic",
             return_value=1030.0,
         ):
             result = integrator.integrate("solar", 1000.0)
@@ -293,7 +293,7 @@ class TestPlausibilityBounds:
             json.dumps({"solar": [self.POISONED_KWH, 100.0, 0.0], "home": [42.0, 100.0, 0.0]})
         )
         with patch(
-            "ecoflow_energy.ecoflow.energy_integrator.time.monotonic",
+            "ecoflow_energy_test.ecoflow.energy_integrator.time.monotonic",
             return_value=200.0,
         ):
             integrator = EnergyIntegrator(state_file)
@@ -315,7 +315,7 @@ class TestPlausibilityBounds:
             json.dumps({"solar_energy_kwh": [self.POISONED_KWH, 100.0, 0.0]})
         )
         with patch(
-            "ecoflow_energy.ecoflow.energy_integrator.time.monotonic",
+            "ecoflow_energy_test.ecoflow.energy_integrator.time.monotonic",
             return_value=200.0,
         ):
             integrator = EnergyIntegrator(state_file)

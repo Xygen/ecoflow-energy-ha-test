@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ecoflow_energy.const import (
+from custom_components.ecoflow_energy_test.const import (
     CONF_ACCESS_KEY,
     CONF_DEVICES,
     CONF_MODE,
@@ -19,14 +19,14 @@ from custom_components.ecoflow_energy.const import (
     DOMAIN,
     MODE_STANDARD,
 )
-from custom_components.ecoflow_energy.diagnostics import (
+from custom_components.ecoflow_energy_test.diagnostics import (
     REDACTED,
     _device_diagnostics,
     _redact_serials,
     _skipped_devices_diagnostics,
     async_get_config_entry_diagnostics,
 )
-from custom_components.ecoflow_energy.coordinator import EcoFlowDeviceCoordinator
+from custom_components.ecoflow_energy_test.coordinator import EcoFlowDeviceCoordinator
 
 from .conftest import (
     MOCK_DELTA_DEVICE,
@@ -53,7 +53,7 @@ class TestConfigEntryDiagnostics:
         """All credentials in config_entry must be REDACTED."""
         standard_config_entry.add_to_hass(hass)
         with patch(
-            "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
+            "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
             new_callable=AsyncMock,
         ):
             await hass.config_entries.async_setup(standard_config_entry.entry_id)
@@ -77,7 +77,7 @@ class TestConfigEntryDiagnostics:
         """Diagnostics output has expected top-level keys."""
         standard_config_entry.add_to_hass(hass)
         with patch(
-            "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
+            "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
             new_callable=AsyncMock,
         ):
             await hass.config_entries.async_setup(standard_config_entry.entry_id)
@@ -118,7 +118,7 @@ class TestConfigEntryDiagnostics:
         }
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_ACCESS_KEY: "test_access_key",
                 CONF_SECRET_KEY: "test_secret_key",
@@ -130,7 +130,7 @@ class TestConfigEntryDiagnostics:
         entry.add_to_hass(hass)
 
         with patch(
-            "custom_components.ecoflow_energy.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
+            "custom_components.ecoflow_energy_test.coordinator.EcoFlowDeviceCoordinator.async_config_entry_first_refresh",
             new_callable=AsyncMock,
         ):
             await hass.config_entries.async_setup(entry.entry_id)
@@ -200,7 +200,7 @@ class TestDeviceDiagnostics:
 
         mock_mqtt_client.last_connect_time = 1000.0
         with patch(
-            "custom_components.ecoflow_energy.diagnostics.time.monotonic",
+            "custom_components.ecoflow_energy_test.diagnostics.time.monotonic",
             return_value=1120.0,
         ):
             result = _device_diagnostics(coordinator)
@@ -220,12 +220,31 @@ class TestDeviceDiagnostics:
         )
         coordinator._last_mqtt_ts = 1000.0
         with patch(
-            "custom_components.ecoflow_energy.diagnostics.time.monotonic",
+            "custom_components.ecoflow_energy_test.diagnostics.time.monotonic",
             return_value=1010.0,
         ):
             result = _device_diagnostics(coordinator)
 
         assert result["data_freshness"]["last_mqtt_age_s"] == 10.0
+
+    async def test_data_freshness_reports_raw_mqtt_receive_age(
+        self,
+        hass: HomeAssistant,
+        standard_config_entry: MockConfigEntry,
+    ) -> None:
+        """Diagnostics separates transport traffic from parsed telemetry."""
+        standard_config_entry.add_to_hass(hass)
+        coordinator = EcoFlowDeviceCoordinator(
+            hass, standard_config_entry, MOCK_DELTA_DEVICE
+        )
+        coordinator._last_mqtt_rx_ts = 1005.0
+        with patch(
+            "custom_components.ecoflow_energy_test.diagnostics.time.monotonic",
+            return_value=1010.0,
+        ):
+            result = _device_diagnostics(coordinator)
+
+        assert result["data_freshness"]["last_mqtt_rx_age_s"] == 5.0
 
     async def test_data_keys_enumerated(
         self,
@@ -272,6 +291,26 @@ class TestDeviceDiagnostics:
         coordinator.update_interval = timedelta(seconds=30)
         result = _device_diagnostics(coordinator)
         assert result["data_freshness"]["http_fallback_active"] is True
+
+    async def test_powerglow_report_polling_has_its_own_flag(
+        self,
+        hass: HomeAssistant,
+        enhanced_config_entry: MockConfigEntry,
+    ) -> None:
+        """PowerGlow report polling is intentional, not stale-MQTT fallback."""
+        enhanced_config_entry.add_to_hass(hass)
+        device = {
+            "sn": "HF33000000000001",
+            "name": "PowerGlow",
+            "product_name": "PowerGlow",
+            "device_type": DEVICE_TYPE_POWERGLOW,
+        }
+        coordinator = EcoFlowDeviceCoordinator(hass, enhanced_config_entry, device)
+
+        result = _device_diagnostics(coordinator)
+
+        assert result["data_freshness"]["http_fallback_active"] is False
+        assert result["data_freshness"]["app_detail_polling_active"] is True
 
     async def test_event_log_in_diagnostics(
         self,
@@ -369,7 +408,7 @@ class TestDeltaThreeRawQuotaDiagnostics:
         coordinator._raw_quota_captured_at = 1000.0
 
         with patch(
-            "custom_components.ecoflow_energy.diagnostics.time.monotonic",
+            "custom_components.ecoflow_energy_test.diagnostics.time.monotonic",
             return_value=1005.0,
         ):
             result = _device_diagnostics(coordinator)
@@ -500,7 +539,7 @@ class TestSkippedDeviceRawQuotaDiagnostics:
     """Raw quota capture for unsupported/skipped devices (issue #135)."""
 
     DIAG_QUOTA_PATH = (
-        "custom_components.ecoflow_energy.diagnostics.EcoFlowHTTPQuota"
+        "custom_components.ecoflow_energy_test.diagnostics.EcoFlowHTTPQuota"
     )
     # Fictional Smart Meter serial: a device we do not yet parse.
     SKIPPED_SN = "SM3ATEST00000001"
@@ -521,7 +560,7 @@ class TestSkippedDeviceRawQuotaDiagnostics:
     def _standard_entry(self) -> MockConfigEntry:
         return MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_ACCESS_KEY: "test_access_key",
                 CONF_SECRET_KEY: "test_secret_key",
@@ -578,7 +617,7 @@ class TestSkippedDeviceRawQuotaDiagnostics:
         """App-auth mode (no dev keys): quota omitted with a note, no crash."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_MODE: MODE_STANDARD,
                 CONF_DEVICES: [],

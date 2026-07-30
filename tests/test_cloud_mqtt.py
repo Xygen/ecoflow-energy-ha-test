@@ -4,7 +4,7 @@ import logging
 import time
 from unittest.mock import MagicMock, patch
 
-from ecoflow_energy.ecoflow.cloud_mqtt import EcoFlowMQTTClient
+from ecoflow_energy_test.ecoflow.cloud_mqtt import EcoFlowMQTTClient
 
 
 def _make_client(**kwargs) -> EcoFlowMQTTClient:
@@ -28,7 +28,7 @@ class TestSubscribeDataFlag:
         client = _make_client(subscribe_data=False)
         assert client._subscribe_data is False
 
-    @patch("ecoflow_energy.ecoflow.cloud_mqtt.mqtt.Client")
+    @patch("ecoflow_energy_test.ecoflow.cloud_mqtt.mqtt.Client")
     def test_standard_mode_no_data_subscriptions(self, mock_mqtt_cls):
         """In Standard Mode (subscribe_data=False), _on_connect subscribes only to set_reply."""
         mock_paho = MagicMock()
@@ -46,7 +46,7 @@ class TestSubscribeDataFlag:
         assert "/set_reply" in topics_subscribed[0]
         assert not any("/quota" in t for t in topics_subscribed)
 
-    @patch("ecoflow_energy.ecoflow.cloud_mqtt.mqtt.Client")
+    @patch("ecoflow_energy_test.ecoflow.cloud_mqtt.mqtt.Client")
     def test_enhanced_mode_subscribes_data_topics(self, mock_mqtt_cls):
         """In Enhanced Mode (subscribe_data=True), _on_connect must subscribe to data topics."""
         mock_paho = MagicMock()
@@ -86,6 +86,16 @@ class TestClientCreation:
     def test_empty_credentials_fails(self):
         client = _make_client(certificate_account="", certificate_password="")
         assert client.create_client() is False
+
+    @patch("ecoflow_energy_test.ecoflow.cloud_mqtt.mqtt.Client")
+    def test_tcp_client_id_is_namespaced_for_parallel_install(self, mock_mqtt_cls):
+        client = _make_client(wss_mode=False, device_sn="HF33000000000001")
+
+        assert client.create_client() is True
+
+        assert mock_mqtt_cls.call_args.kwargs["client_id"] == (
+            "ecoflow_energy_test_HF33000000000001"
+        )
 
 
 class TestConnectionStatus:
@@ -205,14 +215,14 @@ class TestShouldAttemptReconnect:
 
         # 61s elapsed: must be allowed (uncapped 2x would demand 120s)
         with patch(
-            "ecoflow_energy.ecoflow.cloud_mqtt.time.monotonic",
+            "ecoflow_energy_test.ecoflow.cloud_mqtt.time.monotonic",
             return_value=1000.0 + 61,
         ):
             assert client._should_attempt_reconnect() is True
 
         # 59s elapsed: still blocked (cap is 60, not less)
         with patch(
-            "ecoflow_energy.ecoflow.cloud_mqtt.time.monotonic",
+            "ecoflow_energy_test.ecoflow.cloud_mqtt.time.monotonic",
             return_value=1000.0 + 59,
         ):
             assert client._should_attempt_reconnect() is False
@@ -245,7 +255,7 @@ class TestTryReconnect:
 
 
 class TestForceReconnect:
-    @patch("ecoflow_energy.ecoflow.cloud_mqtt.mqtt.Client")
+    @patch("ecoflow_energy_test.ecoflow.cloud_mqtt.mqtt.Client")
     def test_recreates_client(self, mock_mqtt_cls):
         mock_paho = MagicMock()
         mock_mqtt_cls.return_value = mock_paho
@@ -262,7 +272,7 @@ class TestForceReconnect:
         assert client.client is not old_paho  # new client created
         assert result is True
 
-    @patch("ecoflow_energy.ecoflow.cloud_mqtt.mqtt.Client")
+    @patch("ecoflow_energy_test.ecoflow.cloud_mqtt.mqtt.Client")
     def test_force_reconnect_creation_failure(self, mock_mqtt_cls):
         """If create_client fails, force_reconnect returns False."""
         client = _make_client(certificate_account="", certificate_password="")
@@ -272,7 +282,7 @@ class TestForceReconnect:
         result = client.force_reconnect()
         assert result is False
 
-    @patch("ecoflow_energy.ecoflow.cloud_mqtt.mqtt.Client")
+    @patch("ecoflow_energy_test.ecoflow.cloud_mqtt.mqtt.Client")
     def test_first_failure_is_not_an_error(self, mock_mqtt_cls, caplog):
         """A transient DNS hiccup must not put a red line in the user's log.
 
@@ -293,7 +303,7 @@ class TestForceReconnect:
         assert [r for r in caplog.records if r.levelno >= logging.WARNING] == []
         assert any("Force-reconnect failed" in r.message for r in caplog.records)
 
-    @patch("ecoflow_energy.ecoflow.cloud_mqtt.mqtt.Client")
+    @patch("ecoflow_energy_test.ecoflow.cloud_mqtt.mqtt.Client")
     def test_sustained_failure_does_warn(self, mock_mqtt_cls, caplog):
         """Once attempts pile up it is worth telling the user."""
         mock_paho = MagicMock()

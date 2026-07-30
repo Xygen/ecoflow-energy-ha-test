@@ -6,8 +6,8 @@ import struct
 
 import pytest
 
-from ecoflow_energy.ecoflow.parsers.stream_proto import parse_stream_proto_message
-from ecoflow_energy.ecoflow.proto_encoding import (
+from ecoflow_energy_test.ecoflow.parsers.stream_proto import parse_stream_proto_message
+from ecoflow_energy_test.ecoflow.proto_encoding import (
     encode_field_bytes,
     encode_field_varint,
     encode_varint,

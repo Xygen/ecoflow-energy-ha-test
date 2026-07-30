@@ -11,7 +11,7 @@ try:
 except ImportError:  # cryptography < 43.0
     from cryptography.hazmat.primitives.ciphers.modes import CFB
 
-from ecoflow_energy.ecoflow.enhanced_auth import _AES_IV, _decrypt_certification
+from ecoflow_energy_test.ecoflow.enhanced_auth import _AES_IV, _decrypt_certification
 
 
 def _encrypt_test_data(token: str, data: dict) -> str:

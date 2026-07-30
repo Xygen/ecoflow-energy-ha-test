@@ -17,7 +17,7 @@ from homeassistant.helpers import entity_registry as er
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ecoflow_energy.const import (
+from custom_components.ecoflow_energy_test.const import (
     CONF_ACCESS_KEY,
     CONF_AUTH_METHOD,
     CONF_DEVICES,
@@ -67,7 +67,7 @@ def _delta3_config_entry() -> MockConfigEntry:
     """Standard-mode config entry carrying a single Delta 3 device."""
     return MockConfigEntry(
         domain=DOMAIN,
-        title="EcoFlow Energy",
+        title="EcoFlow Energy Test",
         data={
             CONF_ACCESS_KEY: "test_ak",
             CONF_SECRET_KEY: "test_sk",
@@ -86,17 +86,17 @@ class TestDelta3EndToEnd:
         caplog,
     ) -> None:
         """Full setup of a Delta 3 device yields populated, available entities."""
-        caplog.set_level(logging.WARNING, logger="custom_components.ecoflow_energy")
+        caplog.set_level(logging.WARNING, logger="custom_components.ecoflow_energy_test")
 
         entry = _delta3_config_entry()
         entry.add_to_hass(hass)
 
         with (
             patch(
-                "custom_components.ecoflow_energy.coordinator.setup.IoTApiClient",
+                "custom_components.ecoflow_energy_test.coordinator.setup.IoTApiClient",
             ) as iot_cls,
             patch(
-                "custom_components.ecoflow_energy.coordinator.setup.EcoFlowHTTPQuota",
+                "custom_components.ecoflow_energy_test.coordinator.setup.EcoFlowHTTPQuota",
             ) as http_cls,
         ):
             iot = iot_cls.return_value
@@ -164,7 +164,7 @@ class TestDelta3EndToEnd:
         integration_problems = [
             r
             for r in caplog.records
-            if r.name.startswith("custom_components.ecoflow_energy")
+            if r.name.startswith("custom_components.ecoflow_energy_test")
             and r.levelno >= logging.WARNING
         ]
         assert not integration_problems, (
@@ -182,20 +182,20 @@ class TestDelta3EnhancedModeRouting:
     """
 
     def _coordinator(self, hass: HomeAssistant):
-        from custom_components.ecoflow_energy.const import (
+        from custom_components.ecoflow_energy_test.const import (
             AUTH_METHOD_APP,
             CONF_EMAIL,
             CONF_PASSWORD,
             CONF_USER_ID,
             MODE_ENHANCED,
         )
-        from custom_components.ecoflow_energy.coordinator import (
+        from custom_components.ecoflow_energy_test.coordinator import (
             EcoFlowDeviceCoordinator,
         )
 
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -211,7 +211,7 @@ class TestDelta3EnhancedModeRouting:
 
     @staticmethod
     def _frame(cmd_func: int, cmd_id: int, inner: bytes) -> bytes:
-        from custom_components.ecoflow_energy.ecoflow.proto_encoding import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto_encoding import (
             encode_field_bytes,
             encode_field_varint,
         )
@@ -223,7 +223,7 @@ class TestDelta3EnhancedModeRouting:
         return encode_field_bytes(1, bytes(header))
 
     async def test_status_frame_is_parsed(self, hass: HomeAssistant) -> None:
-        from custom_components.ecoflow_energy.ecoflow.proto.ecocharge_pb2 import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import (
             Delta3DisplayProperty,
         )
 
@@ -248,7 +248,7 @@ class TestDelta3EnhancedModeRouting:
         assert result["chg_remain_time_min"] == 96
 
     async def test_battery_heartbeat_is_parsed(self, hass: HomeAssistant) -> None:
-        from custom_components.ecoflow_energy.ecoflow.proto.ecocharge_pb2 import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import (
             Delta3CmsHeartbeat,
         )
 
@@ -283,14 +283,14 @@ class TestOtherDeviceClassesAreNotMisrouted:
 
     @staticmethod
     def _stream_coordinator(hass: HomeAssistant):
-        from custom_components.ecoflow_energy.const import (
+        from custom_components.ecoflow_energy_test.const import (
             AUTH_METHOD_APP,
             CONF_EMAIL,
             CONF_PASSWORD,
             CONF_USER_ID,
             MODE_ENHANCED,
         )
-        from custom_components.ecoflow_energy.coordinator import (
+        from custom_components.ecoflow_energy_test.coordinator import (
             EcoFlowDeviceCoordinator,
         )
 
@@ -298,7 +298,7 @@ class TestOtherDeviceClassesAreNotMisrouted:
 
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -316,7 +316,7 @@ class TestOtherDeviceClassesAreNotMisrouted:
     def _fixed32(field_number: int, value: float) -> bytes:
         import struct
 
-        from custom_components.ecoflow_energy.ecoflow.proto_encoding import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto_encoding import (
             encode_varint,
         )
 
@@ -324,7 +324,7 @@ class TestOtherDeviceClassesAreNotMisrouted:
 
     def _stream_status_frame(self) -> bytes:
         """A real Stream AC Pro (254, 21) frame, same shape as the parser test."""
-        from custom_components.ecoflow_energy.ecoflow.proto_encoding import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto_encoding import (
             encode_field_varint,
         )
 
@@ -359,7 +359,7 @@ class TestOtherDeviceClassesAreNotMisrouted:
         self, hass: HomeAssistant
     ) -> None:
         """(32, 2) on a Stream device must not write foreign SoC values."""
-        from custom_components.ecoflow_energy.ecoflow.proto.ecocharge_pb2 import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import (
             Delta3CmsHeartbeat,
         )
 
@@ -387,20 +387,20 @@ class TestDelta3ControlRouting:
 
     @staticmethod
     def _app_coordinator(hass: HomeAssistant):
-        from custom_components.ecoflow_energy.const import (
+        from custom_components.ecoflow_energy_test.const import (
             AUTH_METHOD_APP,
             CONF_EMAIL,
             CONF_PASSWORD,
             CONF_USER_ID,
             MODE_ENHANCED,
         )
-        from custom_components.ecoflow_energy.coordinator import (
+        from custom_components.ecoflow_energy_test.coordinator import (
             EcoFlowDeviceCoordinator,
         )
 
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -418,14 +418,14 @@ class TestDelta3ControlRouting:
 
     @staticmethod
     def _developer_coordinator(hass: HomeAssistant):
-        from custom_components.ecoflow_energy.const import AUTH_METHOD_DEVELOPER
-        from custom_components.ecoflow_energy.coordinator import (
+        from custom_components.ecoflow_energy_test.const import AUTH_METHOD_DEVELOPER
+        from custom_components.ecoflow_energy_test.coordinator import (
             EcoFlowDeviceCoordinator,
         )
 
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_DEVELOPER,
                 CONF_MODE: MODE_STANDARD,
@@ -445,10 +445,10 @@ class TestDelta3ControlRouting:
     ) -> None:
         from unittest.mock import MagicMock
 
-        from custom_components.ecoflow_energy.ecoflow.delta3_commands import (
+        from custom_components.ecoflow_energy_test.ecoflow.delta3_commands import (
             build_switch_command,
         )
-        from custom_components.ecoflow_energy.ecoflow.proto.decoder import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto.decoder import (
             decode_header_message,
         )
 
@@ -511,7 +511,7 @@ class TestDelta3ControlRouting:
     async def test_rejected_setting_is_reported(
         self, hass: HomeAssistant, caplog
     ) -> None:
-        from custom_components.ecoflow_energy.ecoflow.proto_encoding import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto_encoding import (
             encode_field_bytes,
             encode_field_varint,
         )

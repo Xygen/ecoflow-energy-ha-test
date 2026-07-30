@@ -5,7 +5,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-from ecoflow_energy.const import (
+from ecoflow_energy_test.const import (
     DELTA_PROFILE_R331,
     DELTA_PROFILE_R351,
     POWEROCEAN_SENSORS,
@@ -160,7 +160,7 @@ def _extract_sensor_keys(var_name: str) -> list[str]:
         return [item.key for item in runtime_list]
 
     # Fallback: AST extraction for unknown list names
-    source = (REPO_ROOT / "custom_components/ecoflow_energy/const.py").read_text()
+    source = (REPO_ROOT / "custom_components/ecoflow_energy_test/const.py").read_text()
     tree = ast.parse(source)
     for node in ast.walk(tree):
         target_name = None
@@ -505,7 +505,7 @@ class TestBatteryDeviceClassSingleton:
     def test_at_most_one_battery_device_class_per_device_type(self):
         import re as _re
 
-        from ecoflow_energy import const as _const
+        from ecoflow_energy_test import const as _const
 
         for name in dir(_const):
             if not _re.fullmatch(r"[A-Z0-9]+_SENSORS", name):

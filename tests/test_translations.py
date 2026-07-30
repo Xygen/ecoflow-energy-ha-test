@@ -14,9 +14,9 @@ import json
 import re
 from pathlib import Path
 
-TRANSLATIONS_DIR = Path("custom_components/ecoflow_energy/translations")
+TRANSLATIONS_DIR = Path("custom_components/ecoflow_energy_test/translations")
 CONFIG_FLOW_PATHS = sorted(
-    Path("custom_components/ecoflow_energy").glob("config_flow*.py")
+    Path("custom_components/ecoflow_energy_test").glob("config_flow*.py")
 )
 
 EN_PATH = TRANSLATIONS_DIR / "en.json"
@@ -151,7 +151,7 @@ def _extract_schema_keys(node: ast.expr) -> set[str]:
 
 def _resolve_const(name: str) -> str | None:
     """Resolve a CONF_* constant name to its string value by parsing const.py."""
-    const_path = Path("custom_components/ecoflow_energy/const.py")
+    const_path = Path("custom_components/ecoflow_energy_test/const.py")
     tree = ast.parse(const_path.read_text())
     for node in ast.walk(tree):
         if isinstance(node, ast.Assign):

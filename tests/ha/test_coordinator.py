@@ -12,7 +12,7 @@ from homeassistant.core import HomeAssistant
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ecoflow_energy.const import (
+from custom_components.ecoflow_energy_test.const import (
     AUTH_METHOD_APP,
     CONF_AUTH_METHOD,
     CONF_DEVICES,
@@ -24,6 +24,7 @@ from custom_components.ecoflow_energy.const import (
     DEVICE_TYPE_DELTA,
     DEVICE_TYPE_DELTA3,
     DEVICE_TYPE_POWEROCEAN,
+    DEVICE_TYPE_POWERGLOW,
     DEVICE_TYPE_SMARTPLUG,
     DEVICE_TYPE_STREAM,
     DEVICE_TYPE_UNKNOWN,
@@ -43,16 +44,16 @@ from custom_components.ecoflow_energy.const import (
     STALE_THRESHOLD_S,
     STREAM_POWER_TO_ENERGY,
 )
-from custom_components.ecoflow_energy.coordinator import (
+from custom_components.ecoflow_energy_test.coordinator import (
     DeviceSnapshot,
     EcoFlowDeviceCoordinator,
 )
-from custom_components.ecoflow_energy.ecoflow.parsers.powerocean_proto import (
+from custom_components.ecoflow_energy_test.ecoflow.parsers.powerocean_proto import (
     flatten_heartbeat,
     remap_bp_keys,
     remap_proto_keys,
 )
-from custom_components.ecoflow_energy.ecoflow.proto_encoding import (
+from custom_components.ecoflow_energy_test.ecoflow.proto_encoding import (
     encode_field_bytes,
     encode_field_varint,
     encode_varint,
@@ -85,7 +86,7 @@ def _feed_samples(
     window behaves realistically without relying on real-time delays.
     """
     with patch(
-        "custom_components.ecoflow_energy.coordinator.time.monotonic"
+        "custom_components.ecoflow_energy_test.coordinator.time.monotonic"
     ) as mock_mono:
         for i, v in enumerate(values):
             mock_mono.return_value = start_ts + i * dt
@@ -104,7 +105,7 @@ def _feed_timeline(
     """
     states: list[str] = []
     with patch(
-        "custom_components.ecoflow_energy.coordinator.time.monotonic"
+        "custom_components.ecoflow_energy_test.coordinator.time.monotonic"
     ) as mock_mono:
         for offset, v in points:
             mock_mono.return_value = start_ts + offset
@@ -445,7 +446,7 @@ class TestProperties:
         coordinator._device_available = True
         coordinator._last_mqtt_ts = 1000.0
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1005.0,
         ):
             assert coordinator.availability_stage == "healthy"
@@ -464,7 +465,7 @@ class TestProperties:
         coordinator._device_available = True
         coordinator._last_mqtt_ts = 1000.0
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1000.0 + STALE_THRESHOLD_S + 10,
         ):
             assert coordinator.availability_stage == "stale"
@@ -491,7 +492,7 @@ class TestProperties:
         """Smart Plug in Enhanced Mode uses the relaxed soft threshold."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -574,7 +575,7 @@ class TestSetup:
         """App-auth setup with empty email/password triggers reauth, no MQTT."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -599,7 +600,7 @@ class TestSetup:
         """Developer-auth setup without API keys triggers reauth, no clients."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 "mode": MODE_STANDARD,
                 "devices": [MOCK_DELTA_DEVICE],
@@ -1239,7 +1240,7 @@ class TestReauthSuppression:
         )
 
         with patch(
-            "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+            "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
         ) as cls:
             instance = cls.return_value
             instance.login = AsyncMock(return_value=False)
@@ -1620,7 +1621,7 @@ class TestSETCommands:
     ) -> EcoFlowDeviceCoordinator:
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -1678,7 +1679,7 @@ class TestSETCommands:
         coordinator._mqtt_client = mock_mqtt
 
         with patch(
-            "custom_components.ecoflow_energy.ecoflow.delta3_commands."
+            "custom_components.ecoflow_energy_test.ecoflow.delta3_commands."
             "build_proto_command",
             return_value=b"\x0a\x01",
         ):
@@ -1833,7 +1834,7 @@ class TestStaleDetection:
         """Smart Plug app-auth uses a higher stale threshold than PowerOcean."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -1856,7 +1857,7 @@ class TestStaleDetection:
         """Smart Plug is not marked unavailable at ~45s MQTT age."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -1896,7 +1897,7 @@ class TestStaleDetection:
 
         now = 10_000.0
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=now,
         ):
             # Data age between soft and hard threshold: degraded but available
@@ -1905,7 +1906,7 @@ class TestStaleDetection:
 
         assert coordinator.device_available is True
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=now,
         ):
             assert coordinator.availability_stage == "degraded"
@@ -1933,7 +1934,7 @@ class TestStaleDetection:
 
         now = 10_000.0
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=now,
         ):
             # Data age beyond hard threshold
@@ -1947,19 +1948,13 @@ class TestStaleDetection:
         assert "reconnect_attempts=5" in caplog.text
         self._cleanup_stale_timer(coordinator)
 
-    async def test_app_auth_transient_unavailable_logs_info_not_warning(
+    async def test_app_auth_waits_for_first_frame_during_initial_grace(
         self,
         hass: HomeAssistant,
         enhanced_config_entry: MockConfigEntry,
         caplog: pytest.LogCaptureFixture,
     ) -> None:
-        """A transient interruption (no pending reconnects) must not WARN.
-
-        Reproduces a device that connected but has not pushed a frame yet
-        (age is infinite, reconnect_attempts=0). Marking it unavailable is a
-        normal graduated-availability transition and must stay at INFO so the
-        HA log stays free of WARNING noise (zero-noise-logging policy).
-        """
+        """The five-second health check must not immediately disable entities."""
         enhanced_config_entry.add_to_hass(hass)
         coordinator = EcoFlowDeviceCoordinator(
             hass, enhanced_config_entry, MOCK_POWEROCEAN_DEVICE
@@ -1970,25 +1965,121 @@ class TestStaleDetection:
 
         now = 10_000.0
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=now,
         ):
-            # Never received data -> age is infinite, past the hard threshold
+            coordinator._mqtt_monitor_started_ts = now - 5
             coordinator._last_mqtt_ts = 0.0
             with caplog.at_level("INFO"):
                 coordinator._check_stale()
 
+            assert coordinator.device_available is True
+            assert coordinator.availability_stage == "healthy"
+            assert coordinator.data_receiving is False
+
+        assert "became unavailable" not in caplog.text
+        self._cleanup_stale_timer(coordinator)
+
+    async def test_app_auth_no_first_frame_unavailable_only_after_hard_timeout(
+        self,
+        hass: HomeAssistant,
+        enhanced_config_entry: MockConfigEntry,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """No-data sessions still become unavailable after the full grace window."""
+        enhanced_config_entry.add_to_hass(hass)
+        coordinator = EcoFlowDeviceCoordinator(
+            hass, enhanced_config_entry, MOCK_POWEROCEAN_DEVICE
+        )
+        coordinator._mqtt_client = MagicMock()
+        coordinator._mqtt_client.is_connected.return_value = True
+        coordinator._mqtt_client.reconnect_attempts = 0
+
+        now = 10_000.0
+        with patch(
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
+            return_value=now,
+        ):
+            coordinator._mqtt_monitor_started_ts = now - HARD_UNAVAILABLE_S - 1
+            with caplog.at_level("INFO"):
+                coordinator._check_stale()
             assert coordinator.device_available is False
             assert coordinator.availability_stage == "unavailable"
 
         assert "became unavailable" in caplog.text
         assert "no data since connect" in caplog.text
-        # The transition must not be logged at WARNING or above
         assert not [
-            r for r in caplog.records
-            if r.levelname in ("WARNING", "ERROR", "CRITICAL")
-            and "became unavailable" in r.getMessage()
+            record
+            for record in caplog.records
+            if record.levelname in ("WARNING", "ERROR", "CRITICAL")
+            and "became unavailable" in record.getMessage()
         ]
+        self._cleanup_stale_timer(coordinator)
+
+    async def test_powerglow_raw_rx_prevents_transport_reconnect_churn(
+        self,
+        hass: HomeAssistant,
+        enhanced_config_entry: MockConfigEntry,
+    ) -> None:
+        """Fresh diagnostics-only HF33 traffic proves the WSS session is alive."""
+        enhanced_config_entry.add_to_hass(hass)
+        device = {
+            "sn": "HF33000000000001",
+            "name": "PowerGlow",
+            "product_name": "PowerGlow",
+            "device_type": DEVICE_TYPE_POWERGLOW,
+        }
+        coordinator = EcoFlowDeviceCoordinator(hass, enhanced_config_entry, device)
+        coordinator._mqtt_client = MagicMock()
+        coordinator._mqtt_client.is_connected.return_value = True
+        coordinator._mqtt_client.reconnect_attempts = 0
+
+        now = 10_000.0
+        with patch(
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
+            return_value=now,
+        ):
+            coordinator._mqtt_monitor_started_ts = now - HARD_UNAVAILABLE_S - 10
+            coordinator._last_mqtt_rx_ts = now - 1
+            coordinator._last_cloud_ts = now - 1
+            coordinator._check_stale()
+
+        coordinator._mqtt_client.resend_initial_requests.assert_not_called()
+        coordinator._mqtt_client.force_reconnect.assert_not_called()
+        assert coordinator.device_available is True
+        self._cleanup_stale_timer(coordinator)
+
+    async def test_powerglow_raw_rx_does_not_fake_entity_freshness(
+        self,
+        hass: HomeAssistant,
+        enhanced_config_entry: MockConfigEntry,
+    ) -> None:
+        """Raw HF33 traffic alone cannot keep measurements available forever."""
+        enhanced_config_entry.add_to_hass(hass)
+        device = {
+            "sn": "HF33000000000001",
+            "name": "PowerGlow",
+            "product_name": "PowerGlow",
+            "device_type": DEVICE_TYPE_POWERGLOW,
+        }
+        coordinator = EcoFlowDeviceCoordinator(hass, enhanced_config_entry, device)
+        coordinator._mqtt_client = MagicMock()
+        coordinator._mqtt_client.is_connected.return_value = True
+        coordinator._mqtt_client.reconnect_attempts = 0
+
+        now = 10_000.0
+        with patch(
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
+            return_value=now,
+        ):
+            coordinator._mqtt_monitor_started_ts = now - HARD_UNAVAILABLE_S - 10
+            coordinator._last_mqtt_rx_ts = now - 1
+            coordinator._check_stale()
+            assert coordinator.availability_stage == "unavailable"
+
+        coordinator._mqtt_client.resend_initial_requests.assert_not_called()
+        coordinator._mqtt_client.force_reconnect.assert_not_called()
+        assert coordinator.device_available is False
         self._cleanup_stale_timer(coordinator)
 
     async def test_availability_stage_transitions(
@@ -2006,7 +2097,7 @@ class TestStaleDetection:
 
         now = 1_000.0
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=now,
         ):
             # Healthy: fresh data
@@ -2042,7 +2133,7 @@ class TestStaleDetection:
 
         now = 10_000.0
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=now,
         ):
             # 590s gap: between SOFT_UNAVAILABLE (300s) and HARD_UNAVAILABLE (600s)
@@ -2052,7 +2143,7 @@ class TestStaleDetection:
         assert coordinator.device_available is True
         # Check stage with the same mocked time
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=now,
         ):
             assert coordinator.availability_stage == "degraded"
@@ -2081,7 +2172,7 @@ class TestStaleDetection:
         coordinator._last_stale_reconnect_ts = 0.0
         now = 1000.0 + STALE_THRESHOLD_S + 5
         clock = patch(
-            "custom_components.ecoflow_energy.coordinator.availability.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.availability.time.monotonic",
             return_value=now,
         )
 
@@ -2124,7 +2215,7 @@ class TestStaleDetection:
         coordinator._last_mqtt_ts = 1000.0
 
         with patch(
-            "custom_components.ecoflow_energy.coordinator.availability.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.availability.time.monotonic",
             return_value=1000.0 + 1.0,
         ):
             coordinator._check_stale()
@@ -2190,7 +2281,7 @@ class TestStaleDetection:
         coordinator._last_mqtt_ts = 1000.0
 
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1005.0,  # data age 5s, well within stale threshold
         ):
             coordinator._check_stale()
@@ -2220,7 +2311,7 @@ class TestStaleDetection:
         now = 10_000.0
         with (
             patch(
-                "custom_components.ecoflow_energy.coordinator.time.monotonic",
+                "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
                 return_value=now,
             ),
             patch.object(coordinator, "async_update_listeners") as mock_notify,
@@ -2249,7 +2340,7 @@ class TestStaleDetection:
 
         with (
             patch(
-                "custom_components.ecoflow_energy.coordinator.time.monotonic",
+                "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
                 return_value=1005.0,
             ),
             patch.object(coordinator, "async_update_listeners") as mock_notify,
@@ -2367,7 +2458,7 @@ class TestEnhancedSetup:
             hass, enhanced_config_entry, MOCK_POWEROCEAN_DEVICE
         )
         with patch(
-            "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+            "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
         ) as cls:
             instance = cls.return_value
             instance.login = AsyncMock(return_value=True)
@@ -2584,7 +2675,7 @@ class TestApplyData:
 
         # Simulate EMS injecting "discharging" raw value - must be stripped
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=2000.0,
         ):
             coordinator._apply_data({
@@ -2617,7 +2708,7 @@ class TestApplyData:
             hass, enhanced_config_entry, MOCK_POWEROCEAN_DEVICE
         )
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic"
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic"
         ) as mock_mono:
             for i in range(10):
                 mock_mono.return_value = 1000.0 + i * 3.0
@@ -2639,7 +2730,7 @@ class TestApplyData:
             hass, enhanced_config_entry, MOCK_POWEROCEAN_DEVICE
         )
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic"
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic"
         ) as mock_mono:
             for i in range(10):
                 mock_mono.return_value = 1000.0 + i * 3.0
@@ -2673,7 +2764,7 @@ class TestApplyData:
                 transitions.append(s)
 
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic"
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic"
         ) as mock_mono:
             for ts_offset, batt_w in _PROD_TIMELINE_2026_04_20:
                 mock_mono.return_value = 1000.0 + ts_offset
@@ -2911,7 +3002,7 @@ class TestApplyData:
         coordinator._energy_integrator._loaded = True
 
         clock = (
-            "custom_components.ecoflow_energy.ecoflow.energy_integrator"
+            "custom_components.ecoflow_energy_test.ecoflow.energy_integrator"
             ".time.monotonic"
         )
         reading = {"solar_w": 3000.0, "batt_charge_power_w": 2000.0}
@@ -2949,7 +3040,7 @@ class TestApplyData:
         coordinator._energy_integrator._loaded = True
 
         clock = (
-            "custom_components.ecoflow_energy.ecoflow.energy_integrator"
+            "custom_components.ecoflow_energy_test.ecoflow.energy_integrator"
             ".time.monotonic"
         )
 
@@ -3714,8 +3805,8 @@ class TestMonotonicFilter:
         """
         import re as _re
 
-        from custom_components.ecoflow_energy import const as _const
-        from custom_components.ecoflow_energy.coordinator.mqtt_ingest import (
+        from custom_components.ecoflow_energy_test import const as _const
+        from custom_components.ecoflow_energy_test.coordinator.mqtt_ingest import (
             MqttIngestMixin,
         )
 
@@ -3969,7 +4060,7 @@ class TestQuotasPoll:
         """Smart Plug app-auth sends latestQuotas + get-all on first poll."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -4004,7 +4095,7 @@ class TestQuotasPoll:
         """Smart Plug get-all is throttled between keepalive windows."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -4023,7 +4114,7 @@ class TestQuotasPoll:
         coordinator._last_smartplug_get_all_ts = 1000.0
 
         with (
-            patch("custom_components.ecoflow_energy.coordinator.time.monotonic", return_value=1000.0),
+            patch("custom_components.ecoflow_energy_test.coordinator.time.monotonic", return_value=1000.0),
             patch.object(hass, "async_add_executor_job") as mock_exec,
         ):
             coordinator._send_quotas_poll()
@@ -4040,7 +4131,7 @@ class TestQuotasPoll:
         """Smart Plug get-all is sent again once keepalive interval has elapsed."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -4060,7 +4151,7 @@ class TestQuotasPoll:
 
         with (
             patch(
-                "custom_components.ecoflow_energy.coordinator.time.monotonic",
+                "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
                 return_value=1000.0 + SMARTPLUG_GET_ALL_KEEPALIVE_S + 1.0,
             ),
             patch.object(hass, "async_add_executor_job") as mock_exec,
@@ -4162,11 +4253,11 @@ class TestParseMessageProtobuf:
         enhanced_config_entry: MockConfigEntry,
     ) -> None:
         """_parse_message decodes a protobuf energy_stream frame for PowerOcean."""
-        from custom_components.ecoflow_energy.ecoflow.proto_encoding import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto_encoding import (
             encode_field_bytes,
             encode_field_varint,
         )
-        from custom_components.ecoflow_energy.ecoflow.proto.ecocharge_pb2 import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import (
             JTS1EnergyStreamReport,
         )
 
@@ -4228,11 +4319,11 @@ class TestParseMessageProtobuf:
         enhanced_config_entry: MockConfigEntry,
     ) -> None:
         """E2E: bp_heartbeat proto frame with 2 packs survives underscore filter."""
-        from custom_components.ecoflow_energy.ecoflow.proto_encoding import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto_encoding import (
             encode_field_bytes,
             encode_field_varint,
         )
-        from custom_components.ecoflow_energy.ecoflow.proto.ecocharge_pb2 import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import (
             JTS1BpHeartbeatReport,
         )
 
@@ -4284,7 +4375,7 @@ class TestParseMessageProtobuf:
         )
         topic = "/app/device/property/HW52TEST00000001"
         with patch(
-            "custom_components.ecoflow_energy.coordinator.mqtt_ingest.decode_proto_runtime_frame",
+            "custom_components.ecoflow_energy_test.coordinator.mqtt_ingest.decode_proto_runtime_frame",
             side_effect=RuntimeError("decoder blew up"),
         ):
             result = coordinator._parse_message(topic, b"\x0a\x02\x08\x01")
@@ -4311,7 +4402,7 @@ class TestParseMessageProtobuf:
         enhanced_config_entry: MockConfigEntry,
     ) -> None:
         """An EMS heartbeat frame (96, 1) is flattened into sensor keys."""
-        from custom_components.ecoflow_energy.ecoflow.proto.ecocharge_pb2 import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import (
             JTS1EmsHeartbeat,
         )
 
@@ -4334,7 +4425,7 @@ class TestParseMessageProtobuf:
         enhanced_config_entry: MockConfigEntry,
     ) -> None:
         """A param-change frame (96, 13) passes ems_app_surplus_pct through."""
-        from custom_components.ecoflow_energy.ecoflow.proto.ecocharge_pb2 import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import (
             JTS1EmsParamChangeReport,
         )
 
@@ -4356,7 +4447,7 @@ class TestParseMessageProtobuf:
         enhanced_config_entry: MockConfigEntry,
     ) -> None:
         """An empty param-change frame yields None (no keys to apply)."""
-        from custom_components.ecoflow_energy.ecoflow.proto.ecocharge_pb2 import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import (
             JTS1EmsParamChangeReport,
         )
 
@@ -4378,7 +4469,7 @@ class TestParseMessageProtobuf:
         enhanced_config_entry: MockConfigEntry,
     ) -> None:
         """An empty EMS change frame (96, 8) yields None."""
-        from custom_components.ecoflow_energy.ecoflow.proto.ecocharge_pb2 import (
+        from custom_components.ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import (
             JTS1EmsChangeReport,
         )
 
@@ -4450,7 +4541,7 @@ class TestParseMessageProtobuf:
             mapped={"_is_ems_change": True}, headers=[],
         )
         with patch(
-            "custom_components.ecoflow_energy.coordinator.mqtt_ingest."
+            "custom_components.ecoflow_energy_test.coordinator.mqtt_ingest."
             "decode_proto_runtime_frame",
             return_value=fake_result,
         ):
@@ -4466,7 +4557,7 @@ class TestParseMessageProtobuf:
         """_parse_proto_device_data for a Stream device uses the BK31 mapper."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 "access_key": "ak", "secret_key": "sk",
                 "mode": MODE_STANDARD, "devices": [MOCK_STREAM_DEVICE],
@@ -4602,7 +4693,7 @@ class TestParseMessageGetReply:
 
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 "access_key": "ak", "secret_key": "sk",
                 "mode": MODE_STANDARD, "devices": [MOCK_SMARTPLUG_DEVICE],
@@ -4636,7 +4727,7 @@ class TestParseMessageGetReply:
         """Stream get_reply protobuf is parsed via the BK31 proto mapper."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -4675,7 +4766,7 @@ class TestParseMessageGetReply:
         """A Stream coordinator wires STREAM_POWER_TO_ENERGY (not empty)."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -4772,8 +4863,8 @@ class TestParseMessageGetReply:
         self, hass: HomeAssistant, enhanced_config_entry: MockConfigEntry,
     ) -> None:
         """PowerOcean proto get_reply extracts EmsChangeReport (cmd_func=96, cmd_id=8)."""
-        from ecoflow_energy.ecoflow.proto.ecocharge_pb2 import JTS1EmsChangeReport
-        from ecoflow_energy.ecoflow.proto_encoding import encode_field_bytes, encode_field_varint
+        from ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import JTS1EmsChangeReport
+        from ecoflow_energy_test.ecoflow.proto_encoding import encode_field_bytes, encode_field_varint
 
         enhanced_config_entry.add_to_hass(hass)
         coordinator = EcoFlowDeviceCoordinator(
@@ -4805,7 +4896,7 @@ class TestParseMessageGetReply:
         self, hass: HomeAssistant, enhanced_config_entry: MockConfigEntry,
     ) -> None:
         """Proto get_reply without cmd_func=96/cmd_id=8 header returns None."""
-        from ecoflow_energy.ecoflow.proto_encoding import encode_field_bytes, encode_field_varint
+        from ecoflow_energy_test.ecoflow.proto_encoding import encode_field_bytes, encode_field_varint
 
         enhanced_config_entry.add_to_hass(hass)
         coordinator = EcoFlowDeviceCoordinator(
@@ -4830,7 +4921,7 @@ class TestParseMessageGetReply:
 
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 "access_key": "ak", "secret_key": "sk",
                 "mode": MODE_STANDARD, "devices": [MOCK_STREAM_DEVICE],
@@ -4851,7 +4942,7 @@ class TestParseMessageGetReply:
         self, hass: HomeAssistant, enhanced_config_entry: MockConfigEntry,
     ) -> None:
         """Binary get_reply for PowerOcean routes to _parse_powerocean_get_reply."""
-        from ecoflow_energy.ecoflow.proto.ecocharge_pb2 import JTS1EmsChangeReport
+        from ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import JTS1EmsChangeReport
 
         enhanced_config_entry.add_to_hass(hass)
         coordinator = EcoFlowDeviceCoordinator(
@@ -4870,7 +4961,7 @@ class TestParseMessageGetReply:
         self, hass: HomeAssistant, enhanced_config_entry: MockConfigEntry,
     ) -> None:
         """Sub-messages with cmd_func != 96 are skipped entirely."""
-        from ecoflow_energy.ecoflow.proto.ecocharge_pb2 import JTS1EmsChangeReport
+        from ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import JTS1EmsChangeReport
 
         enhanced_config_entry.add_to_hass(hass)
         coordinator = EcoFlowDeviceCoordinator(
@@ -4908,7 +4999,7 @@ class TestParseMessageGetReply:
             hass, enhanced_config_entry, MOCK_POWEROCEAN_DEVICE
         )
         with patch(
-            "custom_components.ecoflow_energy.ecoflow.proto.decoder."
+            "custom_components.ecoflow_energy_test.ecoflow.proto.decoder."
             "decode_header_message",
             return_value=(
                 [{"cmd_func": 96, "cmd_id": 8, "pdata": "zznothex"}],
@@ -4927,7 +5018,7 @@ class TestParseMessageGetReply:
             hass, enhanced_config_entry, MOCK_POWEROCEAN_DEVICE
         )
         with patch(
-            "custom_components.ecoflow_energy.ecoflow.proto.decoder."
+            "custom_components.ecoflow_energy_test.ecoflow.proto.decoder."
             "decode_header_message",
             return_value=(
                 [{"cmd_func": 96, "cmd_id": 8, "pdata": "ffffffffffff"}],
@@ -4941,7 +5032,7 @@ class TestParseMessageGetReply:
         self, hass: HomeAssistant, enhanced_config_entry: MockConfigEntry,
     ) -> None:
         """An empty EmsChangeReport produces no fields and yields None."""
-        from ecoflow_energy.ecoflow.proto.ecocharge_pb2 import JTS1EmsChangeReport
+        from ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import JTS1EmsChangeReport
 
         enhanced_config_entry.add_to_hass(hass)
         coordinator = EcoFlowDeviceCoordinator(
@@ -4956,7 +5047,7 @@ class TestParseMessageGetReply:
         self, hass: HomeAssistant, enhanced_config_entry: MockConfigEntry,
     ) -> None:
         """ems_word_mode from cmd_id=8 is renamed and enum-mapped to work mode."""
-        from ecoflow_energy.ecoflow.proto.ecocharge_pb2 import JTS1EmsChangeReport
+        from ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import JTS1EmsChangeReport
 
         enhanced_config_entry.add_to_hass(hass)
         coordinator = EcoFlowDeviceCoordinator(
@@ -4974,7 +5065,7 @@ class TestParseMessageGetReply:
         self, hass: HomeAssistant, enhanced_config_entry: MockConfigEntry,
     ) -> None:
         """dev_soc from cmd_id=13 surfaces as ems_app_surplus_pct."""
-        from ecoflow_energy.ecoflow.proto.ecocharge_pb2 import (
+        from ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import (
             JTS1EmsParamChangeReport,
         )
 
@@ -4995,7 +5086,7 @@ class TestParseMessageGetReply:
         """Binary SmartPlug get_reply routes through _parse_proto_device_data."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 "access_key": "ak", "secret_key": "sk",
                 "mode": MODE_STANDARD, "devices": [MOCK_SMARTPLUG_DEVICE],
@@ -5029,7 +5120,7 @@ class TestParseMessageGetReply:
         # yields an empty dict.
         unknown_field = bytes(encode_field_varint(1000, 1)).hex()
         with patch(
-            "custom_components.ecoflow_energy.ecoflow.proto.decoder."
+            "custom_components.ecoflow_energy_test.ecoflow.proto.decoder."
             "decode_header_message",
             return_value=(
                 [{"cmd_func": 96, "cmd_id": 8, "pdata": unknown_field}],
@@ -5141,6 +5232,24 @@ class TestDiagnosticProperties:
         )
         coordinator.update_interval = timedelta(seconds=30)
         assert coordinator.connection_mode == "enhanced_fallback"
+
+    async def test_powerglow_report_polling_is_not_labeled_http_fallback(
+        self,
+        hass: HomeAssistant,
+        enhanced_config_entry: MockConfigEntry,
+    ) -> None:
+        """Planned PowerGlow report polling remains part of Enhanced Mode."""
+        enhanced_config_entry.add_to_hass(hass)
+        device = {
+            "sn": "HF33000000000001",
+            "name": "PowerGlow",
+            "product_name": "PowerGlow",
+            "device_type": DEVICE_TYPE_POWERGLOW,
+        }
+        coordinator = EcoFlowDeviceCoordinator(hass, enhanced_config_entry, device)
+
+        assert coordinator.update_interval is not None
+        assert coordinator.connection_mode == "enhanced"
 
 
 # ===========================================================================
@@ -5330,7 +5439,7 @@ class TestAppAuthMode:
     ) -> MockConfigEntry:
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -5377,6 +5486,106 @@ class TestAppAuthMode:
         assert coordinator.enhanced_mode is True
         assert coordinator.update_interval is None
 
+    async def test_app_auth_powerglow_uses_read_only_report_polling(
+        self, hass: HomeAssistant, mock_mqtt_client,
+    ) -> None:
+        """Undecoded PowerGlow MQTT keeps a consumer-report polling fallback."""
+        powerglow = {
+            "sn": "HF33000000000001",
+            "name": "PowerGlow",
+            "product_name": "PowerGlow",
+            "device_type": DEVICE_TYPE_POWERGLOW,
+            "online": 1,
+        }
+        entry = self._create_app_auth_entry(hass, powerglow)
+        coordinator = EcoFlowDeviceCoordinator(hass, entry, powerglow)
+        assert coordinator.update_interval is not None
+        assert coordinator.update_interval.total_seconds() == HTTP_FALLBACK_INTERVAL_S
+
+        app_api = MagicMock()
+        app_api.login = AsyncMock(return_value=True)
+        app_api.user_id = "uid"
+        app_api.get_device_list = AsyncMock(return_value=[])
+        app_api.get_powerocean_devices = AsyncMock(return_value=[{
+            "sn": "HJ31000000000001", "product_type": "85", "name": "PowerOcean"
+        }])
+        app_api.get_mqtt_credentials = AsyncMock(return_value={
+            "userName": "app-user", "password": "app-pass",
+        })
+        app_api.get_device_detail = AsyncMock(return_value={
+            "code": "0",
+            "data": {"quota": {
+                "JTS1_HEATING_ROD_PARAM_REPORT": {
+                    "hrSn": "HF33000000000001",
+                    "heatingPower": 2998, "targetPower": 3500, "temp": 51.2,
+                },
+                "JTS1_HEATING_ROD_ENERGY_STREAM_REPORT": {
+                    "hrEnergyStream": [{
+                        "hrSn": "HF33000000000001",
+                        "hrPwr": 3001, "fromPv": 2000, "fromGrid": 1001,
+                        "fromBat": 0,
+                    }],
+                },
+            }},
+        })
+
+        with patch(
+            "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
+            return_value=app_api,
+        ):
+            await coordinator.async_setup()
+            data = await coordinator._async_update_data()
+
+        assert data["heating_power_w"] == 3001.0
+        assert data["target_power_w"] == 3500.0
+        assert data["power_from_pv_w"] == 2000.0
+        assert coordinator.snapshot.source == "app_detail"
+        assert coordinator.last_cloud_ts > 0
+        assert coordinator._mqtt_monitor_started_ts > 0
+        await coordinator.async_shutdown()
+
+    async def test_powerglow_parent_discovery_recovers_without_reload(
+        self,
+        hass: HomeAssistant,
+    ) -> None:
+        """A temporary parent-discovery failure is retried by report polling."""
+        powerglow = {
+            "sn": "HF33000000000001",
+            "name": "PowerGlow",
+            "product_name": "PowerGlow",
+            "device_type": DEVICE_TYPE_POWERGLOW,
+            "online": 1,
+        }
+        entry = self._create_app_auth_entry(hass, powerglow)
+        coordinator = EcoFlowDeviceCoordinator(hass, entry, powerglow)
+        app_api = MagicMock()
+        app_api.get_device_list = AsyncMock(return_value=[{
+            "sn": "HJ31000000000001",
+            "product_name": "PowerOcean",
+            "product_type": "85",
+            "device_type": DEVICE_TYPE_POWEROCEAN,
+        }])
+        app_api.get_powerocean_devices = AsyncMock(return_value=[])
+        app_api.get_device_detail = AsyncMock(return_value={
+            "code": "0",
+            "data": {"quota": {
+                "JTS1_HEATING_ROD_PARAM_REPORT": {
+                    "hrSn": "HF33000000000001", "heatingPower": 2400,
+                }
+            }},
+        })
+        coordinator._app_api = app_api
+        coordinator._powerglow_parent_devices = []
+        coordinator._last_powerglow_parent_discovery_ts = 0.0
+
+        data = await coordinator._async_update_data()
+
+        assert data["heating_power_w"] == 2400.0
+        assert coordinator._powerglow_parent_devices[0]["sn"] == (
+            "HJ31000000000001"
+        )
+        app_api.get_device_detail.assert_awaited_once()
+
     async def test_app_auth_setup_calls_login(
         self, hass: HomeAssistant, mock_mqtt_client,
     ) -> None:
@@ -5395,7 +5604,7 @@ class TestAppAuthMode:
         })
 
         with patch(
-            "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+            "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
             return_value=mock_app_api,
         ):
             await coordinator.async_setup()
@@ -5420,7 +5629,7 @@ class TestAppAuthMode:
 
         with (
             patch(
-                "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+                "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
                 return_value=mock_app_api,
             ),
             patch.object(entry, "async_start_reauth") as mock_reauth,
@@ -5472,11 +5681,11 @@ class TestAppAuthMode:
 
         with (
             patch(
-                "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+                "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
                 return_value=mock_app_api,
             ),
             patch(
-                "custom_components.ecoflow_energy.coordinator.setup.EcoFlowMQTTClient",
+                "custom_components.ecoflow_energy_test.coordinator.setup.EcoFlowMQTTClient",
             ) as mqtt_cls,
         ):
             instance = mqtt_cls.return_value
@@ -5518,11 +5727,11 @@ class TestAppAuthMode:
 
         with (
             patch(
-                "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+                "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
                 return_value=mock_app_api,
             ),
             patch(
-                "custom_components.ecoflow_energy.coordinator.setup.EcoFlowMQTTClient",
+                "custom_components.ecoflow_energy_test.coordinator.setup.EcoFlowMQTTClient",
             ) as mqtt_cls,
         ):
             instance = mqtt_cls.return_value
@@ -5550,7 +5759,7 @@ class TestAppAuthMode:
         })
 
         with patch(
-            "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+            "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
             return_value=mock_refresh_api,
         ):
             handler()
@@ -5609,7 +5818,7 @@ class TestAppAuthMode:
         # Call proactive refresh directly instead of going through
         # _check_credential_age -> async_create_task (avoids timing issues in CI)
         with patch(
-            "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+            "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
             return_value=mock_app_api,
         ):
             await coordinator._proactive_credential_refresh()
@@ -5637,7 +5846,7 @@ class TestAppAuthMode:
         with (
             patch.object(hass, "async_create_task") as mock_task,
             patch(
-                "custom_components.ecoflow_energy.coordinator.time.monotonic",
+                "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
                 return_value=1.0 + CREDENTIAL_MAX_AGE_S + 100,
             ),
         ):
@@ -5668,7 +5877,7 @@ class TestAppAuthMode:
         mock_app_api.login = AsyncMock(return_value=False)
 
         with patch(
-            "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+            "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
             return_value=mock_app_api,
         ):
             await coordinator._proactive_credential_refresh()
@@ -5701,7 +5910,7 @@ class TestAppAuthMode:
         coordinator._shutdown = True
         coordinator._credential_obtained_ts = 1.0
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1.0 + CREDENTIAL_MAX_AGE_S + 100,
         ):
             coordinator._check_credential_age()
@@ -5714,7 +5923,7 @@ class TestAppAuthMode:
         """Coordinator on an app-auth entry with empty email/password."""
         entry = MockConfigEntry(
             domain=DOMAIN,
-            title="EcoFlow Energy",
+            title="EcoFlow Energy Test",
             data={
                 CONF_AUTH_METHOD: AUTH_METHOD_APP,
                 CONF_MODE: MODE_ENHANCED,
@@ -5757,7 +5966,7 @@ class TestAppAuthMode:
         mock_app_api.login = AsyncMock(return_value=False)
         with (
             patch(
-                "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+                "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
                 return_value=mock_app_api,
             ),
             patch.object(entry, "async_start_reauth") as mock_reauth,
@@ -5782,7 +5991,7 @@ class TestAppAuthMode:
         mock_app_api.get_mqtt_credentials = AsyncMock(return_value=None)
         with (
             patch(
-                "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+                "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
                 return_value=mock_app_api,
             ),
             patch.object(entry, "async_start_reauth") as mock_reauth,
@@ -5830,7 +6039,7 @@ class TestAppAuthMode:
         mock_app_api.login = AsyncMock(return_value=True)
         mock_app_api.get_mqtt_credentials = AsyncMock(return_value=None)
         with patch(
-            "custom_components.ecoflow_energy.ecoflow.app_api.AppApiClient",
+            "custom_components.ecoflow_energy_test.ecoflow.app_api.AppApiClient",
             return_value=mock_app_api,
         ):
             await coordinator._proactive_credential_refresh()
@@ -5928,7 +6137,7 @@ class TestSnapshotContinuity:
         coordinator._last_stale_reconnect_ts = 0.0
 
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1000.0 + STALE_THRESHOLD_S + 10,
         ):
             coordinator._check_stale()
@@ -5959,7 +6168,7 @@ class TestSnapshotContinuity:
         coordinator._last_stale_reconnect_ts = 0.0
 
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1000.0 + SOFT_UNAVAILABLE_S + 10,
         ):
             coordinator._check_stale()
@@ -5993,7 +6202,7 @@ class TestSnapshotContinuity:
         coordinator._last_stale_reconnect_ts = 0.0
 
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1000.0 + HARD_UNAVAILABLE_S + 10,
         ):
             coordinator._check_stale()
@@ -6028,7 +6237,7 @@ class TestSnapshotContinuity:
         coordinator._last_stale_reconnect_ts = 0.0
 
         with patch(
-            "custom_components.ecoflow_energy.coordinator.time.monotonic",
+            "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
             return_value=1000.0 + HARD_UNAVAILABLE_S + 10,
         ):
             coordinator._check_stale()
@@ -6054,7 +6263,7 @@ class TestSnapshotContinuity:
         standard_config_entry: MockConfigEntry,
     ) -> None:
         """Diagnostics output includes snapshot metadata."""
-        from custom_components.ecoflow_energy.diagnostics import _device_diagnostics
+        from custom_components.ecoflow_energy_test.diagnostics import _device_diagnostics
 
         standard_config_entry.add_to_hass(hass)
         coordinator = EcoFlowDeviceCoordinator(
@@ -6079,7 +6288,7 @@ class TestSnapshotContinuity:
         standard_config_entry: MockConfigEntry,
     ) -> None:
         """Diagnostics for a fresh coordinator shows no snapshot."""
-        from custom_components.ecoflow_energy.diagnostics import _device_diagnostics
+        from custom_components.ecoflow_energy_test.diagnostics import _device_diagnostics
 
         standard_config_entry.add_to_hass(hass)
         coordinator = EcoFlowDeviceCoordinator(
@@ -6335,7 +6544,7 @@ class TestDeveloperCredentialRefresh:
                 standard_config_entry, "async_start_reauth"
             ) as mock_reauth,
             patch(
-                "custom_components.ecoflow_energy.coordinator.time.monotonic",
+                "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
                 return_value=5000.0,
             ),
         ):
@@ -6403,7 +6612,7 @@ class TestDeveloperCredentialRefresh:
         with (
             patch.object(hass, "async_add_executor_job") as mock_exec,
             patch(
-                "custom_components.ecoflow_energy.coordinator.time.monotonic",
+                "custom_components.ecoflow_energy_test.coordinator.time.monotonic",
                 return_value=6000.0,
             ),
         ):
@@ -6546,6 +6755,32 @@ class TestRawFrameCapture:
         assert frames[0]["size"] == len(payload)
         assert frames[0]["topic"] == "property"
         assert frames[0]["parsed_keys"] == 0
+
+    async def test_powerglow_direct_frame_is_diagnostics_only(
+        self,
+        hass: HomeAssistant,
+        enhanced_config_entry: MockConfigEntry,
+    ) -> None:
+        """An unverified direct HF33 frame is retained but never mis-decoded."""
+        enhanced_config_entry.add_to_hass(hass)
+        device = {
+            "sn": "HF33000000000001",
+            "name": "PowerGlow",
+            "device_type": DEVICE_TYPE_POWERGLOW,
+        }
+        coordinator = EcoFlowDeviceCoordinator(hass, enhanced_config_entry, device)
+        payload = self._frame(device["sn"])
+
+        assert coordinator._parse_message(
+            f"/app/device/property/{device['sn']}", payload
+        ) is None
+
+        coordinator._on_mqtt_message(
+            f"/app/device/property/{device['sn']}", payload
+        )
+        assert len(coordinator.raw_frames) == 1
+        assert coordinator.raw_frames[0]["parsed_keys"] == 0
+        assert coordinator.data == {}
 
     async def test_serial_is_masked_in_captured_frame(
         self,
@@ -6692,7 +6927,7 @@ class TestStreamQuotaRouting:
         coordinator = self._coordinator(hass, standard_config_entry)
 
         with patch(
-            "custom_components.ecoflow_energy.coordinator.mqtt_ingest."
+            "custom_components.ecoflow_energy_test.coordinator.mqtt_ingest."
             "parse_stream_proto_message",
             return_value={"soc_pct": 55},
         ) as mock_proto:

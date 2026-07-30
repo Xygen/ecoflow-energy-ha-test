@@ -15,18 +15,18 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ecoflow_energy.const import (
+from custom_components.ecoflow_energy_test.const import (
     DOMAIN,
     EcoFlowBinarySensorDef,
     EcoFlowNumberDef,
     EcoFlowSensorDef,
     EcoFlowSwitchDef,
 )
-from custom_components.ecoflow_energy.coordinator import EcoFlowDeviceCoordinator
-from custom_components.ecoflow_energy.sensor import EcoFlowDiagnosticSensor, EcoFlowSensor
-from custom_components.ecoflow_energy.binary_sensor import EcoFlowBinarySensor
-from custom_components.ecoflow_energy.switch import EcoFlowSwitch
-from custom_components.ecoflow_energy.number import EcoFlowNumber
+from custom_components.ecoflow_energy_test.coordinator import EcoFlowDeviceCoordinator
+from custom_components.ecoflow_energy_test.sensor import EcoFlowDiagnosticSensor, EcoFlowSensor
+from custom_components.ecoflow_energy_test.binary_sensor import EcoFlowBinarySensor
+from custom_components.ecoflow_energy_test.switch import EcoFlowSwitch
+from custom_components.ecoflow_energy_test.number import EcoFlowNumber
 
 from .conftest import MOCK_DELTA_DEVICE
 

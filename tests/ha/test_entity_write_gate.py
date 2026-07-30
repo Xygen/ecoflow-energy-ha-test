@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import pytest
 
-from custom_components.ecoflow_energy.entity import EcoFlowWriteGateMixin
+from custom_components.ecoflow_energy_test.entity import EcoFlowWriteGateMixin
 
 
 class _EntityBase:

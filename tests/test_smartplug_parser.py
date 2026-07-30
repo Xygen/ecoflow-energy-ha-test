@@ -2,7 +2,7 @@
 
 import pytest
 
-from ecoflow_energy.ecoflow.parsers.smartplug import (
+from ecoflow_energy_test.ecoflow.parsers.smartplug import (
     build_plug_brightness_payload,
     build_plug_max_watts_payload,
     build_plug_switch_payload,
@@ -368,7 +368,7 @@ class TestSmartPlugProto:
 
     def test_synthetic_all_fields(self):
         """Synthetic message with all plug_heartbeat_pack sensor fields."""
-        from ecoflow_energy.ecoflow.proto_encoding import (
+        from ecoflow_energy_test.ecoflow.proto_encoding import (
             encode_field_bytes,
             encode_field_varint,
         )
@@ -412,7 +412,7 @@ class TestSmartPlugProto:
 
     def test_proto_error_code_sentinel_65535_maps_to_zero(self):
         """Proto: 65535 sentinel on error/warning codes mapped to 0."""
-        from ecoflow_energy.ecoflow.proto_encoding import (
+        from ecoflow_energy_test.ecoflow.proto_encoding import (
             encode_field_bytes,
             encode_field_varint,
         )
@@ -431,7 +431,7 @@ class TestSmartPlugProto:
 
     def test_switch_off_in_proto(self):
         """Switch state 0 (off) is correctly parsed."""
-        from ecoflow_energy.ecoflow.proto_encoding import (
+        from ecoflow_energy_test.ecoflow.proto_encoding import (
             encode_field_bytes,
             encode_field_varint,
         )
@@ -531,7 +531,7 @@ class TestSmartPlugSetCommands:
         # isRwCmd would be field 19, wire type 0: tag = (19 << 3) | 0 = 0x98 0x01
         # isQueue would be field 20, wire type 0: tag = (20 << 3) | 0 = 0xA0 0x01
         # Check these tags don't appear in the header (inner of outer field 1)
-        from ecoflow_energy.ecoflow.parsers.smartplug import _decode_varint_fields, _extract_pdata
+        from ecoflow_energy_test.ecoflow.parsers.smartplug import _decode_varint_fields, _extract_pdata
         from google.protobuf.internal.decoder import _DecodeVarint
 
         # Parse the outer Send_Header_Msg to get the Header bytes
@@ -573,10 +573,10 @@ class TestSmartPlugSignedVarint:
     """Negative int32/int64 varints must decode to negative numbers."""
 
     def test_proto_heartbeat_negative_temperature(self):
-        from ecoflow_energy.ecoflow.parsers.smartplug import (
+        from ecoflow_energy_test.ecoflow.parsers.smartplug import (
             parse_smartplug_proto_heartbeat,
         )
-        from ecoflow_energy.ecoflow.proto_encoding import encode_field_varint
+        from ecoflow_energy_test.ecoflow.proto_encoding import encode_field_varint
 
         pdata = (
             encode_field_varint(6, _neg64(-5))   # temp = -5 C
@@ -587,7 +587,7 @@ class TestSmartPlugSignedVarint:
         assert result["power_w"] == pytest.approx(150.0)
 
     def test_proto_envelope_negative_temperature(self):
-        from ecoflow_energy.ecoflow.proto_encoding import (
+        from ecoflow_energy_test.ecoflow.proto_encoding import (
             encode_field_bytes,
             encode_field_varint,
         )
@@ -620,7 +620,7 @@ class TestSmartPlugSignedVarint:
         assert result["power_w"] == pytest.approx(145.0)
 
     def test_heartbeat_truncated_varint_no_raise(self):
-        from ecoflow_energy.ecoflow.parsers.smartplug import (
+        from ecoflow_energy_test.ecoflow.parsers.smartplug import (
             parse_smartplug_proto_heartbeat,
         )
 
@@ -629,7 +629,7 @@ class TestSmartPlugSignedVarint:
         assert parse_smartplug_proto_heartbeat(b"\x80") == {}
 
     def test_heartbeat_oversized_varint_no_raise(self):
-        from ecoflow_energy.ecoflow.parsers.smartplug import (
+        from ecoflow_energy_test.ecoflow.parsers.smartplug import (
             parse_smartplug_proto_heartbeat,
         )
 
@@ -637,10 +637,10 @@ class TestSmartPlugSignedVarint:
         assert parse_smartplug_proto_heartbeat(b"\x30" + b"\xff" * 11) == {}
 
     def test_heartbeat_partial_fields_kept_on_truncation(self):
-        from ecoflow_energy.ecoflow.parsers.smartplug import (
+        from ecoflow_energy_test.ecoflow.parsers.smartplug import (
             parse_smartplug_proto_heartbeat,
         )
-        from ecoflow_energy.ecoflow.proto_encoding import encode_field_varint
+        from ecoflow_energy_test.ecoflow.proto_encoding import encode_field_varint
 
         good = encode_field_varint(10, 1500)  # watts = 150.0 W
         result = parse_smartplug_proto_heartbeat(bytes(good) + b"\x30\x80")

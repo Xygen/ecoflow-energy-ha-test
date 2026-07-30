@@ -2,7 +2,7 @@
 
 import pytest
 
-from ecoflow_energy.ecoflow.parsers.delta_http import (
+from ecoflow_energy_test.ecoflow.parsers.delta_http import (
     DELTA2MAX_HTTP_FIELD_MAP,
     parse_delta_http_quota,
 )
@@ -489,7 +489,7 @@ class TestCfgAcOutVolParity:
     """HTTP inv.cfgAcOutVol must land identically to the MQTT path."""
 
     def test_http_scaling_matches_mqtt(self):
-        from ecoflow_energy.ecoflow.parsers.delta import parse_delta_report
+        from ecoflow_energy_test.ecoflow.parsers.delta import parse_delta_report
 
         http = parse_delta_http_quota({"inv.cfgAcOutVol": 230000})
         mqtt = parse_delta_report(

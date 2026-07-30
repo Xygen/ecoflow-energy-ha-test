@@ -23,9 +23,9 @@ from pathlib import Path
 
 import pytest
 
-from ecoflow_energy import const as C
+from ecoflow_energy_test import const as C
 
-TRANSLATIONS_DIR = Path("custom_components/ecoflow_energy/translations")
+TRANSLATIONS_DIR = Path("custom_components/ecoflow_energy_test/translations")
 LANGS = ("en", "de")
 
 # Diagnostic sensors created directly in sensor.py (not definition-driven)

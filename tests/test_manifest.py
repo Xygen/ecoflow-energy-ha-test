@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-MANIFEST_PATH = Path("custom_components/ecoflow_energy/manifest.json")
+MANIFEST_PATH = Path("custom_components/ecoflow_energy_test/manifest.json")
 
 
 def _load_manifest() -> dict:
@@ -16,7 +16,7 @@ class TestManifest:
 
     def test_domain(self):
         m = _load_manifest()
-        assert m["domain"] == "ecoflow_energy"
+        assert m["domain"] == "ecoflow_energy_test"
 
     def test_iot_class_is_cloud_push(self):
         """Enhanced Mode + Delta MQTT push — iot_class reflects primary data source."""

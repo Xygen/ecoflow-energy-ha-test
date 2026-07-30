@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from ecoflow_energy.ecoflow.parsers.powerocean import (
+from ecoflow_energy_test.ecoflow.parsers.powerocean import (
     parse_powerocean_http_quota,
     _extract_battery_pack,
     _extract_energy_stream,
@@ -12,7 +12,7 @@ from ecoflow_energy.ecoflow.parsers.powerocean import (
     _extract_ems_extended,
     _is_real_battery_pack,
 )
-from ecoflow_energy.ecoflow.parsers.powerocean_proto import remap_bp_keys
+from ecoflow_energy_test.ecoflow.parsers.powerocean_proto import remap_bp_keys
 
 
 # ===========================================================================
@@ -326,8 +326,8 @@ class TestMPPTStrings:
         them against each other, so raising one without the others fails here
         instead of silently dropping a string in production.
         """
-        from ecoflow_energy.const import POWEROCEAN_SENSORS
-        from ecoflow_energy.ecoflow.parsers.powerocean_proto import (
+        from ecoflow_energy_test.const import POWEROCEAN_SENSORS
+        from ecoflow_energy_test.ecoflow.parsers.powerocean_proto import (
             flatten_heartbeat,
         )
 
@@ -1163,7 +1163,7 @@ class TestEnumStringReachability:
     """String enum values must map via the string tables, not be dropped."""
 
     def test_string_work_mode_mapped(self):
-        from ecoflow_energy.ecoflow.parsers.powerocean_proto import (
+        from ecoflow_energy_test.ecoflow.parsers.powerocean_proto import (
             _apply_enum_mappings,
         )
 
@@ -1172,7 +1172,7 @@ class TestEnumStringReachability:
         assert result["ems_work_mode"] == "self_use"
 
     def test_string_pcs_run_state_mapped(self):
-        from ecoflow_energy.ecoflow.parsers.powerocean_proto import (
+        from ecoflow_energy_test.ecoflow.parsers.powerocean_proto import (
             _apply_enum_mappings,
         )
 
@@ -1181,7 +1181,7 @@ class TestEnumStringReachability:
         assert result["pcs_run_state"] == "running"
 
     def test_int_work_mode_still_mapped(self):
-        from ecoflow_energy.ecoflow.parsers.powerocean_proto import (
+        from ecoflow_energy_test.ecoflow.parsers.powerocean_proto import (
             _apply_enum_mappings,
         )
 
@@ -1190,7 +1190,7 @@ class TestEnumStringReachability:
         assert result["ems_work_mode"] == "self_use"
 
     def test_unknown_int_still_dropped(self):
-        from ecoflow_energy.ecoflow.parsers.powerocean_proto import (
+        from ecoflow_energy_test.ecoflow.parsers.powerocean_proto import (
             _apply_enum_mappings,
         )
 
@@ -1203,7 +1203,7 @@ class TestGridStatusFallbackAllPhases:
     """Grid detection must consider all three phase voltages."""
 
     def test_phase_b_energized_when_a_zero(self):
-        from ecoflow_energy.ecoflow.parsers.powerocean_proto import (
+        from ecoflow_energy_test.ecoflow.parsers.powerocean_proto import (
             flatten_heartbeat,
         )
 
@@ -1218,7 +1218,7 @@ class TestGridStatusFallbackAllPhases:
         assert result["grid_status"] == "ok"
 
     def test_phase_a_missing_phase_c_energized(self):
-        from ecoflow_energy.ecoflow.parsers.powerocean_proto import (
+        from ecoflow_energy_test.ecoflow.parsers.powerocean_proto import (
             flatten_heartbeat,
         )
 
@@ -1227,7 +1227,7 @@ class TestGridStatusFallbackAllPhases:
         assert result["grid_status"] == "ok"
 
     def test_all_phases_low_not_detected(self):
-        from ecoflow_energy.ecoflow.parsers.powerocean_proto import (
+        from ecoflow_energy_test.ecoflow.parsers.powerocean_proto import (
             flatten_heartbeat,
         )
 
@@ -1242,7 +1242,7 @@ class TestGridStatusFallbackAllPhases:
         assert result["grid_status"] == "not_detected"
 
     def test_no_phase_data_no_grid_status(self):
-        from ecoflow_energy.ecoflow.parsers.powerocean_proto import (
+        from ecoflow_energy_test.ecoflow.parsers.powerocean_proto import (
             flatten_heartbeat,
         )
 
@@ -1379,7 +1379,7 @@ class TestPercentRangeGuard:
         assert result["pack1_soh"] == 98.0
 
     def test_energy_stream_soc_sentinel_dropped(self):
-        from ecoflow_energy.ecoflow.parsers.powerocean_proto import (
+        from ecoflow_energy_test.ecoflow.parsers.powerocean_proto import (
             remap_proto_keys,
         )
 

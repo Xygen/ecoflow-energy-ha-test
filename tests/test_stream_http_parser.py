@@ -1,6 +1,6 @@
 """Tests for the Stream (BK-series) JSON quota parser."""
 
-from ecoflow_energy.ecoflow.parsers.stream_http import parse_stream_quota
+from ecoflow_energy_test.ecoflow.parsers.stream_http import parse_stream_quota
 
 
 class TestFieldMapping:
@@ -118,7 +118,7 @@ class TestEnergySensorHygiene:
 
     def test_per_string_energy_is_opt_in(self) -> None:
         """Summing enabled strings must not silently under-report a 4-string unit."""
-        from ecoflow_energy.const import STREAM_SENSORS
+        from ecoflow_energy_test.const import STREAM_SENSORS
 
         by_key = {sensor.key: sensor for sensor in STREAM_SENSORS}
         for index in range(1, 5):
@@ -126,7 +126,7 @@ class TestEnergySensorHygiene:
             assert sensor.disabled_by_default is True
 
     def test_per_string_energy_has_dashboard_attributes(self) -> None:
-        from ecoflow_energy.const import STREAM_SENSORS
+        from ecoflow_energy_test.const import STREAM_SENSORS
 
         by_key = {sensor.key: sensor for sensor in STREAM_SENSORS}
         for index in range(1, 5):
@@ -137,8 +137,8 @@ class TestEnergySensorHygiene:
 
     def test_shared_solar_key_is_not_duplicated(self) -> None:
         """PvSum feeds solar_w, so no second total-solar sensor may exist."""
-        from ecoflow_energy.const import STREAM_SENSORS
-        from ecoflow_energy.ecoflow.parsers.stream_http import STREAM_HTTP_FIELD_MAP
+        from ecoflow_energy_test.const import STREAM_SENSORS
+        from ecoflow_energy_test.ecoflow.parsers.stream_http import STREAM_HTTP_FIELD_MAP
 
         solar_keys = [k for k in STREAM_HTTP_FIELD_MAP.values() if k == "solar_w"]
         assert len(solar_keys) == 1

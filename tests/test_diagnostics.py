@@ -9,7 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 def test_diagnostics_redacts_credentials():
     """The diagnostics module must REDACT all credential fields."""
-    with open(REPO_ROOT / "custom_components/ecoflow_energy/diagnostics.py") as f:
+    with open(REPO_ROOT / "custom_components/ecoflow_energy_test/diagnostics.py") as f:
         source = f.read()
 
     # These keys must appear as REDACTED in the output dict
@@ -27,7 +27,7 @@ def test_diagnostics_redacts_credentials():
 
 def test_diagnostics_no_password_values_in_output():
     """Static analysis: diagnostics must never read email/password from entry.data."""
-    with open(REPO_ROOT / "custom_components/ecoflow_energy/diagnostics.py") as f:
+    with open(REPO_ROOT / "custom_components/ecoflow_energy_test/diagnostics.py") as f:
         source = f.read()
 
     # Must not access email/password from entry.data. Access/secret key are

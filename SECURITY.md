@@ -10,7 +10,7 @@ Only the latest release is supported with security updates.
 
 Please use GitHub's private vulnerability reporting feature instead:
 
-1. Go to the [Security tab](https://github.com/shuette42/ecoflow-energy-ha/security) of this repository
+1. Go to the Security tab of the GitHub repository where this test fork is published
 2. Click **Report a vulnerability**
 3. Provide a clear description of the issue, steps to reproduce, and potential impact
 
@@ -18,7 +18,7 @@ I aim to acknowledge reports within 7 days. Fixes will be released as soon as po
 
 ## Scope
 
-**In scope:** Code within `custom_components/ecoflow_energy/` in this repository.
+**In scope:** Code within `custom_components/ecoflow_energy_test/` in this repository.
 
 **Out of scope:**
 - EcoFlow's API, cloud infrastructure, firmware, or mobile apps

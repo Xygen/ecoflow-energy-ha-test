@@ -1,0 +1,1425 @@
+{
+    "config":  {
+                   "step":  {
+                                "user":  {
+                                             "title":  "Verbindungsmodus",
+                                             "description":  "Wie soll die Verbindung zu deinen EcoFlow-Geräten hergestellt werden?\n\n**Standard** - Offizielle EcoFlow IoT API. Von EcoFlow unterstützt. Updates alle 10-30 Sekunden. Erfordert Developer API Keys.\n\n**Enhanced** - Community-basierte Echtzeit-Verbindung. Updates alle ~3 Sekunden. Erfordert dein EcoFlow-App-Login. Inoffiziell - Nutzung auf eigene Verantwortung.",
+                                             "data":  {
+                                                          "mode":  "Verbindungsmodus"
+                                                      }
+                                         },
+                                "developer":  {
+                                                  "title":  "EcoFlow Developer-Zugangsdaten",
+                                                  "description":  "Gib deinen Access Key und Secret Key aus dem [EcoFlow Developer Portal]({developer_portal_url}) ein.",
+                                                  "data":  {
+                                                               "access_key":  "Access Key",
+                                                               "secret_key":  "Secret Key"
+                                                           }
+                                              },
+                                "app_credentials":  {
+                                                        "title":  "EcoFlow App Login",
+                                                        "description":  "Gib die E-Mail-Adresse und das Passwort ein, mit dem du dich in der EcoFlow-App anmeldest. Alle mit deinem Konto verbundenen Geräte werden automatisch erkannt.",
+                                                        "data":  {
+                                                                     "email":  "E-Mail",
+                                                                     "password":  "Passwort"
+                                                                 }
+                                                    },
+                                "devices":  {
+                                                "title":  "Geräte auswählen",
+                                                "description":  "Wähle die EcoFlow-Geräte aus, die du zu Home Assistant hinzufügen möchtest.",
+                                                "data":  {
+                                                             "devices":  "Geräte"
+                                                         }
+                                            },
+                                "reauth_confirm":  {
+                                                       "title":  "EcoFlow Energy Test erneut authentifizieren",
+                                                       "description":  "Ihre EcoFlow API-Zugangsdaten sind nicht mehr gültig. Geben Sie Ihren aktualisierten Access Key und Secret Key vom EcoFlow Developer Portal ein.",
+                                                       "data":  {
+                                                                    "access_key":  "Access Key",
+                                                                    "secret_key":  "Secret Key"
+                                                                }
+                                                   },
+                                "reauth_enhanced":  {
+                                                        "title":  "Enhanced Mode erneut authentifizieren",
+                                                        "description":  "Ihre EcoFlow App-Zugangsdaten sind nicht mehr gültig. Geben Sie Ihre aktualisierte E-Mail-Adresse und Ihr Passwort ein.",
+                                                        "data":  {
+                                                                     "email":  "E-Mail",
+                                                                     "password":  "Passwort"
+                                                                 }
+                                                    },
+                                "reauth_app":  {
+                                                   "title":  "EcoFlow App erneut authentifizieren",
+                                                   "description":  "Deine EcoFlow App-Zugangsdaten sind nicht mehr gültig. Gib deine aktualisierte E-Mail-Adresse und dein Passwort ein.",
+                                                   "data":  {
+                                                                "email":  "E-Mail",
+                                                                "password":  "Passwort"
+                                                            }
+                                               },
+                                "reconfigure_app":  {
+                                                        "title":  "EcoFlow App Zugangsdaten aktualisieren",
+                                                        "description":  "Gib deine EcoFlow App E-Mail-Adresse und dein Passwort ein.",
+                                                        "data":  {
+                                                                     "email":  "E-Mail",
+                                                                     "password":  "Passwort"
+                                                                 }
+                                                    },
+                                "reconfigure_confirm":  {
+                                                            "title":  "EcoFlow Zugangsdaten aktualisieren",
+                                                            "description":  "Geben Sie Ihren aktuellen Access Key und Secret Key aus dem [EcoFlow Developer Portal]({developer_portal_url}) ein.",
+                                                            "data":  {
+                                                                         "access_key":  "Access Key",
+                                                                         "secret_key":  "Secret Key"
+                                                                     }
+                                                        },
+                                "reconfigure_enhanced":  {
+                                                             "title":  "Enhanced Mode Zugangsdaten aktualisieren",
+                                                             "description":  "Geben Sie Ihre EcoFlow App E-Mail-Adresse und Ihr Passwort ein.",
+                                                             "data":  {
+                                                                          "email":  "E-Mail",
+                                                                          "password":  "Passwort"
+                                                                      }
+                                                         }
+                            },
+                   "error":  {
+                                 "cannot_connect":  "Verbindung zur EcoFlow-API fehlgeschlagen. Überprüfe deine Zugangsdaten.",
+                                 "invalid_auth":  "Ungültiger Access Key oder Secret Key.",
+                                 "no_devices":  "Keine Geräte gefunden. Stelle sicher, dass Geräte in der EcoFlow-App gekoppelt sind.",
+                                 "enhanced_login_failed":  "Enhanced-Modus Login fehlgeschlagen. Überprüfe E-Mail und Passwort deines EcoFlow-App-Kontos.",
+                                 "enhanced_decrypt_failed":  "Enhanced-Modus Entschlüsselung der Zugangsdaten fehlgeschlagen.",
+                                 "unknown":  "Ein unerwarteter Fehler ist aufgetreten."
+                             },
+                   "abort":  {
+                                 "already_configured":  "Dieses EcoFlow-Konto ist bereits konfiguriert.",
+                                 "reauth_successful":  "Erneute Authentifizierung erfolgreich.",
+                                 "reconfigure_successful":  "Zugangsdaten erfolgreich aktualisiert."
+                             }
+               },
+    "options":  {
+                    "step":  {
+                                 "init":  {
+                                              "title":  "EcoFlow Energy Test Optionen",
+                                              "description":  "**Standard** - Offizielle EcoFlow IoT API. Von EcoFlow unterstützt. Updates alle 10-30 Sekunden.\n\n**Enhanced** - Community-basierte Echtzeit-Verbindung. Updates alle ~3 Sekunden. Inoffiziell - Nutzung auf eigene Verantwortung.\n\nBeim Wechsel des Modus werden ggf. neue Zugangsdaten benötigt.\n\n**Rohdaten-Aufzeichnung** ist nur sinnvoll, wenn du ein Gerät besitzt, das diese Integration noch nicht unterstützt, und beim Hinzufügen helfen möchtest. Sie öffnet je nicht unterstütztem Gerät eine zusätzliche Verbindung, die nur mithört, zeichnet auf, was das Gerät sendet, und legt es in den Diagnose-Download. An das Gerät wird nie etwas gesendet. Nach 24 Stunden schaltet sie sich selbst ab und kann so nicht versehentlich anbleiben.",
+                                              "data":  {
+                                                           "mode":  "Verbindungsmodus",
+                                                           "devices":  "Geräte",
+                                                           "raw_capture":  "Rohdaten nicht unterstützter Geräte in die Diagnose aufnehmen (endet nach 24 Stunden)"
+                                                       }
+                                          },
+                                 "developer":  {
+                                                   "title":  "Developer API Zugangsdaten",
+                                                   "description":  "Der Standard-Modus benötigt Developer API Keys aus dem EcoFlow IoT Developer Portal.",
+                                                   "data":  {
+                                                                "access_key":  "Access Key",
+                                                                "secret_key":  "Secret Key"
+                                                            }
+                                               },
+                                 "enhanced":  {
+                                                  "title":  "Enhanced-Modus Zugangsdaten",
+                                                  "description":  "Gib die E-Mail-Adresse und das Passwort deines EcoFlow-App-Kontos ein.",
+                                                  "data":  {
+                                                               "email":  "E-Mail",
+                                                               "password":  "Passwort"
+                                                           }
+                                              }
+                             },
+                    "error":  {
+                                  "cannot_connect":  "Verbindung zur EcoFlow-API fehlgeschlagen.",
+                                  "invalid_auth":  "Ungültige API-Zugangsdaten.",
+                                  "enhanced_login_failed":  "Enhanced-Modus Login fehlgeschlagen.",
+                                  "enhanced_decrypt_failed":  "Enhanced-Modus Entschlüsselung fehlgeschlagen.",
+                                  "no_devices":  "Bitte mindestens ein Gerät auswählen.",
+                                  "unknown":  "Ein unerwarteter Fehler ist aufgetreten."
+                              }
+                },
+    "entity":  {
+                   "sensor":  {
+                                  "cms_batt_soc":  {
+                                                       "name":  "Ladezustand"
+                                                   },
+                                  "pow_in_sum_w":  {
+                                                       "name":  "Eingang Gesamt"
+                                                   },
+                                  "pow_out_sum_w":  {
+                                                        "name":  "Ausgang Gesamt"
+                                                    },
+                                  "pv1_in_w":  {
+                                                   "name":  "Solareingang 1"
+                                               },
+                                  "pv2_in_w":  {
+                                                   "name":  "Solareingang 2"
+                                               },
+                                  "dc_12v_out_w":  {
+                                                       "name":  "12V-Ausgang"
+                                                   },
+                                  "ac1_out_w":  {
+                                                    "name":  "AC-Ausgang 1"
+                                                },
+                                  "ac2_out_w":  {
+                                                    "name":  "AC-Ausgang 2"
+                                                },
+                                  "typec3_w":  {
+                                                   "name":  "Type-C 3"
+                                               },
+                                  "solar_w":  {
+                                                  "name":  "Solarleistung"
+                                              },
+                                  "home_w":  {
+                                                 "name":  "Hausverbrauch"
+                                             },
+                                  "grid_w":  {
+                                                 "name":  "Netzleistung"
+                                             },
+                                  "batt_w":  {
+                                                 "name":  "Batterieleistung"
+                                             },
+                                  "batt_charge_power_w":  {
+                                                              "name":  "Batterieladeleistung"
+                                                          },
+                                  "batt_discharge_power_w":  {
+                                                                 "name":  "Batterieentladeleistung"
+                                                             },
+                                  "ac_grid_connection_power_w":  {
+                                                                     "name":  "AC-Netzanschlussleistung"
+                                                                 },
+                                  "home_from_batt_w":  {
+                                                           "name":  "Hausverbrauch aus Batterie"
+                                                       },
+                                  "home_from_grid_w":  {
+                                                           "name":  "Hausverbrauch aus Netz"
+                                                       },
+                                  "ac_outlet_1_w":  {
+                                                        "name":  "AC-Ausgang 1 Leistung"
+                                                    },
+                                  "ac_outlet_2_w":  {
+                                                        "name":  "AC-Ausgang 2 Leistung"
+                                                    },
+                                  "grid_connection_power_w":  {
+                                                                  "name":  "Netzanschlussleistung"
+                                                              },
+                                  "sys_grid_connection_power_w":  {
+                                                                      "name":  "System-Netzanschlussleistung"
+                                                                  },
+                                  "batt_design_cap_mah":  {
+                                                              "name":  "Designkapazität"
+                                                          },
+                                  "batt_charge_capacity_ah":  {
+                                                                  "name":  "Batterieladekapazität"
+                                                              },
+                                  "batt_discharge_capacity_ah":  {
+                                                                     "name":  "Batterieentladekapazität"
+                                                                 },
+                                  "grid_import_power_w":  {
+                                                              "name":  "Netzbezugsleistung"
+                                                          },
+                                  "grid_export_power_w":  {
+                                                              "name":  "Netzeinspeiseleistung"
+                                                          },
+                                  "soc_pct":  {
+                                                  "name":  "Batterieladezustand"
+                                              },
+                                  "bp_soh_pct":  {
+                                                     "name":  "Batteriezustand (SOH)"
+                                                 },
+                                  "bp_cycles":  {
+                                                    "name":  "Batteriezyklen"
+                                                },
+                                  "bp_remain_watth":  {
+                                                          "name":  "Batterierestkapazität"
+                                                      },
+                                  "solar_energy_kwh":  {
+                                                           "name":  "Solarenergie"
+                                                       },
+                                  "home_energy_kwh":  {
+                                                          "name":  "Hausenergie"
+                                                      },
+                                  "grid_import_energy_kwh":  {
+                                                                 "name":  "Netzbezugsenergie"
+                                                             },
+                                  "grid_export_energy_kwh":  {
+                                                                 "name":  "Netzeinspeiseenergie"
+                                                             },
+                                  "batt_charge_energy_kwh":  {
+                                                                 "name":  "Batterieladeenergie"
+                                                             },
+                                  "batt_discharge_energy_kwh":  {
+                                                                    "name":  "Batterieentladeenergie"
+                                                                },
+                                  "bp_voltage_v":  {
+                                                       "name":  "Batteriespannung"
+                                                   },
+                                  "bp_current_a":  {
+                                                       "name":  "Batteriestrom"
+                                                   },
+                                  "bp_max_cell_temp_c":  {
+                                                             "name":  "Batterie-Zelltemperatur (max.)"
+                                                         },
+                                  "bp_min_cell_temp_c":  {
+                                                             "name":  "Batterie-Zelltemperatur (min.)"
+                                                         },
+                                  "bp_env_temp_c":  {
+                                                        "name":  "Batterie-Umgebungstemperatur"
+                                                    },
+                                  "bp_max_mos_temp_c":  {
+                                                            "name":  "Batterie-MOSFET-Temperatur (max.)"
+                                                        },
+                                  "bp_cell_max_vol_mv":  {
+                                                             "name":  "Batterie-Zellspannung (max.)"
+                                                         },
+                                  "bp_cell_min_vol_mv":  {
+                                                             "name":  "Batterie-Zellspannung (min.)"
+                                                         },
+                                  "bp_real_soc_pct":  {
+                                                          "name":  "Batterie-Ladezustand (real)"
+                                                      },
+                                  "bp_real_soh_pct":  {
+                                                          "name":  "Batteriezustand (real)"
+                                                      },
+                                  "bp_down_limit_soc_pct":  {
+                                                                "name":  "Batterie-Ladezustandsgrenze (min.)"
+                                                            },
+                                  "bp_up_limit_soc_pct":  {
+                                                              "name":  "Batterie-Ladezustandsgrenze (max.)"
+                                                          },
+                                  "pcs_ac_freq_hz":  {
+                                                         "name":  "Netzfrequenz"
+                                                     },
+                                  "ems_bp_alive_num":  {
+                                                           "name":  "Batteriepakete online"
+                                                       },
+                                  "bp_online_sum":  {
+                                                        "name":  "Batteriepakete online (EMS)"
+                                                    },
+                                  "mppt_pv1_power_w":  {
+                                                           "name":  "PV-Strang 1 Leistung"
+                                                       },
+                                  "mppt_pv1_voltage_v":  {
+                                                             "name":  "PV-Strang 1 Spannung"
+                                                         },
+                                  "mppt_pv1_current_a":  {
+                                                             "name":  "PV-Strang 1 Strom"
+                                                         },
+                                  "mppt_pv2_power_w":  {
+                                                           "name":  "PV-Strang 2 Leistung"
+                                                       },
+                                  "mppt_pv2_voltage_v":  {
+                                                             "name":  "PV-Strang 2 Spannung"
+                                                         },
+                                  "mppt_pv2_current_a":  {
+                                                             "name":  "PV-Strang 2 Strom"
+                                                         },
+                                  "mppt_pv3_power_w":  {
+                                                           "name":  "PV-Strang 3 Leistung"
+                                                       },
+                                  "mppt_pv3_voltage_v":  {
+                                                             "name":  "PV-Strang 3 Spannung"
+                                                         },
+                                  "mppt_pv3_current_a":  {
+                                                             "name":  "PV-Strang 3 Strom"
+                                                         },
+                                  "mppt_pv4_power_w":  {
+                                                           "name":  "PV-Strang 4 Leistung"
+                                                       },
+                                  "mppt_pv4_voltage_v":  {
+                                                             "name":  "PV-Strang 4 Spannung"
+                                                         },
+                                  "mppt_pv4_current_a":  {
+                                                             "name":  "PV-Strang 4 Strom"
+                                                         },
+                                  "grid_phase_a_voltage_v":  {
+                                                                 "name":  "Netz Phase A Spannung"
+                                                             },
+                                  "grid_phase_b_voltage_v":  {
+                                                                 "name":  "Netz Phase B Spannung"
+                                                             },
+                                  "grid_phase_c_voltage_v":  {
+                                                                 "name":  "Netz Phase C Spannung"
+                                                             },
+                                  "grid_phase_a_active_power_w":  {
+                                                                      "name":  "Netz Phase A Wirkleistung"
+                                                                  },
+                                  "grid_phase_b_active_power_w":  {
+                                                                      "name":  "Netz Phase B Wirkleistung"
+                                                                  },
+                                  "grid_phase_c_active_power_w":  {
+                                                                      "name":  "Netz Phase C Wirkleistung"
+                                                                  },
+                                  "grid_phase_a_current_a":  {
+                                                                 "name":  "Netz Phase A Strom"
+                                                             },
+                                  "grid_phase_b_current_a":  {
+                                                                 "name":  "Netz Phase B Strom"
+                                                             },
+                                  "grid_phase_c_current_a":  {
+                                                                 "name":  "Netz Phase C Strom"
+                                                             },
+                                  "grid_phase_a_reactive_power_var":  {
+                                                                          "name":  "Netz Phase A Blindleistung"
+                                                                      },
+                                  "grid_phase_b_reactive_power_var":  {
+                                                                          "name":  "Netz Phase B Blindleistung"
+                                                                      },
+                                  "grid_phase_c_reactive_power_var":  {
+                                                                          "name":  "Netz Phase C Blindleistung"
+                                                                      },
+                                  "grid_phase_a_apparent_power_va":  {
+                                                                         "name":  "Netz Phase A Scheinleistung"
+                                                                     },
+                                  "grid_phase_b_apparent_power_va":  {
+                                                                         "name":  "Netz Phase B Scheinleistung"
+                                                                     },
+                                  "grid_phase_c_apparent_power_va":  {
+                                                                         "name":  "Netz Phase C Scheinleistung"
+                                                                     },
+                                  "pv_inverter_power_w":  {
+                                                              "name":  "PV-Wechselrichterleistung"
+                                                          },
+                                  "ems_feed_mode":  {
+                                                        "name":  "Einspeisemodus",
+                                                        "state":  {
+                                                                      "off":  "Aus",
+                                                                      "no_limit":  "Unbegrenzt",
+                                                                      "zero":  "Null-Einspeisung",
+                                                                      "limit":  "Begrenzt"
+                                                                  }
+                                                    },
+                                  "ems_work_mode":  {
+                                                        "name":  "Betriebsmodus",
+                                                        "state":  {
+                                                                      "self_use":  "Eigenverbrauch",
+                                                                      "time_of_use":  "Zeitgesteuert",
+                                                                      "backup":  "Backup",
+                                                                      "debug":  "Debug",
+                                                                      "ac_makeup":  "AC-Ergaenzung",
+                                                                      "drm":  "DRM",
+                                                                      "remote_schedule":  "Fernsteuerung",
+                                                                      "standby":  "Standby",
+                                                                      "soc_calibration":  "SoC-Kalibrierung",
+                                                                      "timer":  "Timer",
+                                                                      "fcr":  "FCR",
+                                                                      "third_party":  "Drittanbieter",
+                                                                      "ai_schedule":  "KI-Zeitplan",
+                                                                      "kraken":  "Kraken"
+                                                                  }
+                                                    },
+                                  "pcs_run_state":  {
+                                                        "name":  "Wechselrichter-Status",
+                                                        "state":  {
+                                                                      "standby":  "Standby",
+                                                                      "running":  "Aktiv",
+                                                                      "stopped":  "Gestoppt"
+                                                                  }
+                                                    },
+                                  "grid_status":  {
+                                                      "name":  "Netzstatus",
+                                                      "state":  {
+                                                                    "not_detected":  "Nicht erkannt",
+                                                                    "ok":  "OK"
+                                                                }
+                                                  },
+                                  "pcs_power_factor":  {
+                                                           "name":  "Leistungsfaktor"
+                                                       },
+                                  "ems_feed_power_limit_w":  {
+                                                                 "name":  "Einspeisegrenze"
+                                                             },
+                                  "ems_feed_ratio_pct":  {
+                                                             "name":  "Einspeiseverhältnis"
+                                                         },
+                                  "batt_charge_discharge_state":  {
+                                                                      "name":  "Batterie Lade-/Entladezustand",
+                                                                      "state":  {
+                                                                                    "standby":  "Standby",
+                                                                                    "discharging":  "Entladen",
+                                                                                    "charging":  "Laden"
+                                                                                }
+                                                                  },
+                                  "soc_precise_pct":  {
+                                                          "name":  "Batterie Ladezustand (präzise)"
+                                                      },
+                                  "ac_voltage_v":  {
+                                                       "name":  "AC-Spannung"
+                                                   },
+                                  "ac_frequency_hz":  {
+                                                          "name":  "AC-Frequenz"
+                                                      },
+                                  "backup_reserve_pct":  {
+                                                             "name":  "Backup-Reserve"
+                                                         },
+                                  "max_charge_soc_pct":  {
+                                                             "name":  "Max. Lade-SoC"
+                                                         },
+                                  "min_discharge_soc_pct":  {
+                                                                "name":  "Min. Entlade-SoC"
+                                                            },
+                                  "soc":  {
+                                              "name":  "Ladezustand"
+                                          },
+                                  "bms_soh_pct":  {
+                                                      "name":  "Batteriezustand (SoH)"
+                                                  },
+                                  "bms_precise_soc":  {
+                                                          "name":  "Präziser Ladezustand"
+                                                      },
+                                  "watts_in_sum":  {
+                                                       "name":  "Eingang Gesamt"
+                                                   },
+                                  "watts_out_sum":  {
+                                                        "name":  "Ausgang Gesamt"
+                                                    },
+                                  "ac_in_w":  {
+                                                  "name":  "AC-Eingang"
+                                              },
+                                  "ac_out_w":  {
+                                                   "name":  "AC-Ausgang"
+                                               },
+                                  "solar_in_w":  {
+                                                     "name":  "Solareingang"
+                                                 },
+                                  "solar2_in_w":  {
+                                                      "name":  "Solar 2 Eingang"
+                                                  },
+                                  "mppt_out_w":  {
+                                                     "name":  "MPPT-Ausgang"
+                                                 },
+                                  "car_12v_out_w":  {
+                                                        "name":  "12V-Ausgang"
+                                                    },
+                                  "dcdc_12v_w":  {
+                                                     "name":  "DC-DC 12V"
+                                                 },
+                                  "car_out_w":  {
+                                                    "name":  "Autoausgang"
+                                                },
+                                  "usb1_w":  {
+                                                 "name":  "USB 1"
+                                             },
+                                  "usb2_w":  {
+                                                 "name":  "USB 2"
+                                             },
+                                  "usb_qc1_w":  {
+                                                    "name":  "USB QC 1"
+                                                },
+                                  "usb_qc2_w":  {
+                                                    "name":  "USB QC 2"
+                                                },
+                                  "typec1_w":  {
+                                                   "name":  "Type-C 1"
+                                               },
+                                  "typec2_w":  {
+                                                   "name":  "Type-C 2"
+                                               },
+                                  "ac_chg_rated_power_w":  {
+                                                               "name":  "AC-Nennladeleistung"
+                                                           },
+                                  "batt_voltage_v":  {
+                                                         "name":  "Batteriespannung"
+                                                     },
+                                  "ac_out_vol_v":  {
+                                                       "name":  "AC-Ausgangsspannung"
+                                                   },
+                                  "ac_in_vol_v":  {
+                                                      "name":  "AC-Eingangsspannung"
+                                                  },
+                                  "dc_in_vol_v":  {
+                                                      "name":  "DC-Eingangsspannung"
+                                                  },
+                                  "dcdc_12v_vol_v":  {
+                                                         "name":  "12V-Schienenspannung"
+                                                     },
+                                  "batt_current_a":  {
+                                                         "name":  "Batteriestrom"
+                                                     },
+                                  "ac_out_amp_a":  {
+                                                       "name":  "AC-Ausgangsstrom"
+                                                   },
+                                  "solar_in_amp_a":  {
+                                                         "name":  "Solarstrom"
+                                                     },
+                                  "solar2_in_amp_a":  {
+                                                          "name":  "Solar 2 Strom"
+                                                      },
+                                  "batt_temp_c":  {
+                                                      "name":  "Batterietemperatur"
+                                                  },
+                                  "inv_out_temp_c":  {
+                                                         "name":  "Wechselrichtertemperatur"
+                                                     },
+                                  "dc_in_temp_c":  {
+                                                       "name":  "DC-Eingangstemperatur"
+                                                   },
+                                  "mppt_temp_c":  {
+                                                      "name":  "MPPT-Temperatur"
+                                                  },
+                                  "solar2_mppt_temp_c":  {
+                                                             "name":  "MPPT 2 Temperatur"
+                                                         },
+                                  "batt_max_cell_temp_c":  {
+                                                               "name":  "Zelltemperatur (max.)"
+                                                           },
+                                  "batt_min_cell_temp_c":  {
+                                                               "name":  "Zelltemperatur (min.)"
+                                                           },
+                                  "batt_max_mos_temp_c":  {
+                                                              "name":  "MOSFET-Temperatur (max.)"
+                                                          },
+                                  "remain_time_min":  {
+                                                          "name":  "Restlaufzeit"
+                                                      },
+                                  "chg_remain_time_min":  {
+                                                              "name":  "Restladezeit"
+                                                          },
+                                  "dsg_remain_time_min":  {
+                                                              "name":  "Restentladezeit"
+                                                          },
+                                  "ac_out_freq_hz":  {
+                                                         "name":  "AC-Ausgangsfrequenz"
+                                                     },
+                                  "ac_in_freq_hz":  {
+                                                        "name":  "AC-Eingangsfrequenz"
+                                                    },
+                                  "batt_remain_cap_mah":  {
+                                                              "name":  "Restkapazität"
+                                                          },
+                                  "batt_full_cap_mah":  {
+                                                            "name":  "Vollkapazität"
+                                                        },
+                                  "bms_cycles":  {
+                                                     "name":  "Batteriezyklen"
+                                                 },
+                                  "fan_level":  {
+                                                    "name":  "Lüfterstufe"
+                                                },
+                                  "chg_dsg_state":  {
+                                                        "name":  "Lade-/Entladezustand",
+                                                        "state":  {
+                                                                      "idle":  "Leerlauf",
+                                                                      "discharging":  "Entladen",
+                                                                      "charging":  "Laden"
+                                                                  }
+                                                    },
+                                  "ems_chg_state":  {
+                                                        "name":  "EMS Ladezustand",
+                                                        "state":  {
+                                                                      "idle":  "Leerlauf",
+                                                                      "charging":  "Laden",
+                                                                      "discharging":  "Entladen"
+                                                                  }
+                                                    },
+                                  "charger_type":  {
+                                                       "name":  "Ladegeraetetyp",
+                                                       "state":  {
+                                                                     "none":  "Keins",
+                                                                     "ac":  "AC",
+                                                                     "solar":  "Solar",
+                                                                     "dc":  "DC",
+                                                                     "unknown":  "Unbekannt"
+                                                                 }
+                                                   },
+                                  "mppt_chg_state":  {
+                                                         "name":  "MPPT Ladezustand",
+                                                         "state":  {
+                                                                       "idle":  "Leerlauf",
+                                                                       "charging":  "Laden"
+                                                                   }
+                                                     },
+                                  "ems_lcd_soc":  {
+                                                      "name":  "LCD-Ladezustand"
+                                                  },
+                                  "ems_precise_soc":  {
+                                                          "name":  "EMS Präziser Ladezustand"
+                                                      },
+                                  "solar2_energy_kwh":  {
+                                                            "name":  "Solar 2 Energie"
+                                                        },
+                                  "ac_in_energy_kwh":  {
+                                                           "name":  "AC-Eingangsenergie"
+                                                       },
+                                  "ac_out_energy_kwh":  {
+                                                            "name":  "AC-Ausgangsenergie"
+                                                        },
+                                  "out_energy_kwh":  {
+                                                         "name":  "Ausgangsenergie"
+                                                     },
+                                  "batt_max_cell_vol_mv":  {
+                                                               "name":  "Zellspannung (max.)"
+                                                           },
+                                  "batt_min_cell_vol_mv":  {
+                                                               "name":  "Zellspannung (min.)"
+                                                           },
+                                  "pd_err_code":  {
+                                                      "name":  "PD-Fehlercode"
+                                                  },
+                                  "inv_err_code":  {
+                                                       "name":  "Wechselrichter-Fehlercode"
+                                                   },
+                                  "bms_err_code":  {
+                                                       "name":  "BMS-Fehlercode"
+                                                   },
+                                  "mppt_fault_code":  {
+                                                          "name":  "MPPT-Fehlercode"
+                                                      },
+                                  "slave1_soc":  {
+                                                     "name":  "Slave 1 Ladezustand"
+                                                 },
+                                  "slave1_soh":  {
+                                                     "name":  "Slave 1 Batteriezustand"
+                                                 },
+                                  "slave1_voltage_v":  {
+                                                           "name":  "Slave 1 Spannung"
+                                                       },
+                                  "slave1_current_a":  {
+                                                           "name":  "Slave 1 Strom"
+                                                       },
+                                  "slave1_temp_c":  {
+                                                        "name":  "Slave 1 Temperatur"
+                                                    },
+                                  "slave1_cycles":  {
+                                                        "name":  "Slave 1 Zyklen"
+                                                    },
+                                  "slave1_in_w":  {
+                                                      "name":  "Slave 1 Eingang"
+                                                  },
+                                  "slave1_out_w":  {
+                                                       "name":  "Slave 1 Ausgang"
+                                                   },
+                                  "slave1_remain_cap_mah":  {
+                                                                "name":  "Slave 1 Restkapazität"
+                                                            },
+                                  "slave1_full_cap_mah":  {
+                                                              "name":  "Slave 1 Vollkapazität"
+                                                          },
+                                  "slave1_max_cell_vol_mv":  {
+                                                                 "name":  "Slave 1 Zellspannung (max.)"
+                                                             },
+                                  "slave1_min_cell_vol_mv":  {
+                                                                 "name":  "Slave 1 Zellspannung (min.)"
+                                                             },
+                                  "slave1_max_cell_temp_c":  {
+                                                                 "name":  "Slave 1 Zelltemperatur (max.)"
+                                                             },
+                                  "slave1_min_cell_temp_c":  {
+                                                                 "name":  "Slave 1 Zelltemperatur (min.)"
+                                                             },
+                                  "slave1_max_mos_temp_c":  {
+                                                                "name":  "Slave 1 MOSFET-Temperatur (max.)"
+                                                            },
+                                  "slave1_err_code":  {
+                                                          "name":  "Slave 1 Fehlercode"
+                                                      },
+                                  "slave2_soc":  {
+                                                     "name":  "Slave 2 Ladezustand"
+                                                 },
+                                  "slave2_soh":  {
+                                                     "name":  "Slave 2 Batteriezustand"
+                                                 },
+                                  "slave2_voltage_v":  {
+                                                           "name":  "Slave 2 Spannung"
+                                                       },
+                                  "slave2_current_a":  {
+                                                           "name":  "Slave 2 Strom"
+                                                       },
+                                  "slave2_temp_c":  {
+                                                        "name":  "Slave 2 Temperatur"
+                                                    },
+                                  "slave2_cycles":  {
+                                                        "name":  "Slave 2 Zyklen"
+                                                    },
+                                  "slave2_in_w":  {
+                                                      "name":  "Slave 2 Eingang"
+                                                  },
+                                  "slave2_out_w":  {
+                                                       "name":  "Slave 2 Ausgang"
+                                                   },
+                                  "slave2_remain_cap_mah":  {
+                                                                "name":  "Slave 2 Restkapazität"
+                                                            },
+                                  "slave2_full_cap_mah":  {
+                                                              "name":  "Slave 2 Vollkapazität"
+                                                          },
+                                  "slave2_max_cell_vol_mv":  {
+                                                                 "name":  "Slave 2 Zellspannung (max.)"
+                                                             },
+                                  "slave2_min_cell_vol_mv":  {
+                                                                 "name":  "Slave 2 Zellspannung (min.)"
+                                                             },
+                                  "slave2_max_cell_temp_c":  {
+                                                                 "name":  "Slave 2 Zelltemperatur (max.)"
+                                                             },
+                                  "slave2_min_cell_temp_c":  {
+                                                                 "name":  "Slave 2 Zelltemperatur (min.)"
+                                                             },
+                                  "slave2_max_mos_temp_c":  {
+                                                                "name":  "Slave 2 MOSFET-Temperatur (max.)"
+                                                            },
+                                  "slave2_err_code":  {
+                                                          "name":  "Slave 2 Fehlercode"
+                                                      },
+                                  "power_w":  {
+                                                  "name":  "Leistung"
+                                              },
+                                  "current_a":  {
+                                                    "name":  "Strom"
+                                                },
+                                  "voltage_v":  {
+                                                    "name":  "Spannung"
+                                                },
+                                  "frequency_hz":  {
+                                                       "name":  "Frequenz"
+                                                   },
+                                  "temperature_c":  {
+                                                        "name":  "Temperatur"
+                                                    },
+                                  "max_power_w":  {
+                                                      "name":  "Max. Nennleistung"
+                                                  },
+                                  "max_current_a":  {
+                                                        "name":  "Max. Nennstrom"
+                                                    },
+                                  "led_brightness":  {
+                                                         "name":  "LED-Helligkeit"
+                                                     },
+                                  "error_code":  {
+                                                     "name":  "Fehlercode"
+                                                 },
+                                  "warning_code":  {
+                                                       "name":  "Warnungscode"
+                                                   },
+                                  "energy_kwh":  {
+                                                     "name":  "Energie"
+                                                 },
+                                  "mqtt_status":  {
+                                                      "name":  "MQTT-Status"
+                                                  },
+                                  "connection_mode":  {
+                                                          "name":  "Verbindungsmodus"
+                                                      },
+                                  "pack1_soc":  {
+                                                    "name":  "Pack 1 SoC"
+                                                },
+                                  "pack1_power_w":  {
+                                                        "name":  "Pack 1 Leistung"
+                                                    },
+                                  "pack1_soh":  {
+                                                    "name":  "Pack 1 SoH"
+                                                },
+                                  "pack1_cycles":  {
+                                                       "name":  "Pack 1 Zyklen"
+                                                   },
+                                  "pack1_voltage_v":  {
+                                                          "name":  "Pack 1 Spannung"
+                                                      },
+                                  "pack1_current_a":  {
+                                                          "name":  "Pack 1 Strom"
+                                                      },
+                                  "pack1_remain_watth":  {
+                                                             "name":  "Pack 1 Restkapazität"
+                                                         },
+                                  "pack1_max_cell_temp_c":  {
+                                                                "name":  "Pack 1 Zelltemperatur (max.)"
+                                                            },
+                                  "pack1_min_cell_temp_c":  {
+                                                                "name":  "Pack 1 Zelltemperatur (min.)"
+                                                            },
+                                  "pack1_env_temp_c":  {
+                                                           "name":  "Pack 1 Umgebungstemperatur"
+                                                       },
+                                  "pack1_calendar_soh":  {
+                                                             "name":  "Pack 1 Kalender-SoH"
+                                                         },
+                                  "pack1_cycle_soh":  {
+                                                          "name":  "Pack 1 Zyklen-SoH"
+                                                      },
+                                  "pack1_accu_chg_energy_kwh":  {
+                                                                    "name":  "Pack 1 Lebensdauer-Ladeenergie"
+                                                                },
+                                  "pack1_accu_dsg_energy_kwh":  {
+                                                                    "name":  "Pack 1 Lebensdauer-Entladeenergie"
+                                                                },
+                                  "pack1_max_mos_temp_c":  {
+                                                               "name":  "Pack 1 MOSFET-Temperatur (max.)"
+                                                           },
+                                  "pack1_hv_mos_temp_c":  {
+                                                              "name":  "Pack 1 HV-MOSFET-Temperatur"
+                                                          },
+                                  "pack1_lv_mos_temp_c":  {
+                                                              "name":  "Pack 1 LV-MOSFET-Temperatur"
+                                                          },
+                                  "pack1_bus_voltage_v":  {
+                                                              "name":  "Pack 1 Busspannung"
+                                                          },
+                                  "pack1_ptc_temp_c":  {
+                                                           "name":  "Pack 1 PTC-Heizungstemperatur"
+                                                       },
+                                  "pack1_cell_max_vol_mv":  {
+                                                                "name":  "Pack 1 Zellspannung (max.)"
+                                                            },
+                                  "pack1_cell_min_vol_mv":  {
+                                                                "name":  "Pack 1 Zellspannung (min.)"
+                                                            },
+                                  "pack1_design_cap_mah":  {
+                                                               "name":  "Pack 1 Nennkapazität"
+                                                           },
+                                  "pack1_full_cap_mah":  {
+                                                             "name":  "Pack 1 Vollkapazität"
+                                                         },
+                                  "pack1_error_code":  {
+                                                           "name":  "Pack 1 Fehlercode"
+                                                       },
+                                  "pack2_soc":  {
+                                                    "name":  "Pack 2 SoC"
+                                                },
+                                  "pack2_power_w":  {
+                                                        "name":  "Pack 2 Leistung"
+                                                    },
+                                  "pack2_soh":  {
+                                                    "name":  "Pack 2 SoH"
+                                                },
+                                  "pack2_cycles":  {
+                                                       "name":  "Pack 2 Zyklen"
+                                                   },
+                                  "pack2_voltage_v":  {
+                                                          "name":  "Pack 2 Spannung"
+                                                      },
+                                  "pack2_current_a":  {
+                                                          "name":  "Pack 2 Strom"
+                                                      },
+                                  "pack2_remain_watth":  {
+                                                             "name":  "Pack 2 Restkapazität"
+                                                         },
+                                  "pack2_max_cell_temp_c":  {
+                                                                "name":  "Pack 2 Zelltemperatur (max.)"
+                                                            },
+                                  "pack2_min_cell_temp_c":  {
+                                                                "name":  "Pack 2 Zelltemperatur (min.)"
+                                                            },
+                                  "pack2_env_temp_c":  {
+                                                           "name":  "Pack 2 Umgebungstemperatur"
+                                                       },
+                                  "pack2_calendar_soh":  {
+                                                             "name":  "Pack 2 Kalender-SoH"
+                                                         },
+                                  "pack2_cycle_soh":  {
+                                                          "name":  "Pack 2 Zyklen-SoH"
+                                                      },
+                                  "pack2_accu_chg_energy_kwh":  {
+                                                                    "name":  "Pack 2 Lebensdauer-Ladeenergie"
+                                                                },
+                                  "pack2_accu_dsg_energy_kwh":  {
+                                                                    "name":  "Pack 2 Lebensdauer-Entladeenergie"
+                                                                },
+                                  "pack2_max_mos_temp_c":  {
+                                                               "name":  "Pack 2 MOSFET-Temperatur (max.)"
+                                                           },
+                                  "pack2_hv_mos_temp_c":  {
+                                                              "name":  "Pack 2 HV-MOSFET-Temperatur"
+                                                          },
+                                  "pack2_lv_mos_temp_c":  {
+                                                              "name":  "Pack 2 LV-MOSFET-Temperatur"
+                                                          },
+                                  "pack2_bus_voltage_v":  {
+                                                              "name":  "Pack 2 Busspannung"
+                                                          },
+                                  "pack2_ptc_temp_c":  {
+                                                           "name":  "Pack 2 PTC-Heizungstemperatur"
+                                                       },
+                                  "pack2_cell_max_vol_mv":  {
+                                                                "name":  "Pack 2 Zellspannung (max.)"
+                                                            },
+                                  "pack2_cell_min_vol_mv":  {
+                                                                "name":  "Pack 2 Zellspannung (min.)"
+                                                            },
+                                  "pack2_design_cap_mah":  {
+                                                               "name":  "Pack 2 Nennkapazität"
+                                                           },
+                                  "pack2_full_cap_mah":  {
+                                                             "name":  "Pack 2 Vollkapazität"
+                                                         },
+                                  "pack2_error_code":  {
+                                                           "name":  "Pack 2 Fehlercode"
+                                                       },
+                                  "pack3_soc":  {
+                                                    "name":  "Pack 3 SoC"
+                                                },
+                                  "pack3_power_w":  {
+                                                        "name":  "Pack 3 Leistung"
+                                                    },
+                                  "pack3_soh":  {
+                                                    "name":  "Pack 3 SoH"
+                                                },
+                                  "pack3_cycles":  {
+                                                       "name":  "Pack 3 Zyklen"
+                                                   },
+                                  "pack3_voltage_v":  {
+                                                          "name":  "Pack 3 Spannung"
+                                                      },
+                                  "pack3_current_a":  {
+                                                          "name":  "Pack 3 Strom"
+                                                      },
+                                  "pack3_remain_watth":  {
+                                                             "name":  "Pack 3 Restkapazität"
+                                                         },
+                                  "pack3_max_cell_temp_c":  {
+                                                                "name":  "Pack 3 Zelltemperatur (max.)"
+                                                            },
+                                  "pack3_min_cell_temp_c":  {
+                                                                "name":  "Pack 3 Zelltemperatur (min.)"
+                                                            },
+                                  "pack3_env_temp_c":  {
+                                                           "name":  "Pack 3 Umgebungstemperatur"
+                                                       },
+                                  "pack3_calendar_soh":  {
+                                                             "name":  "Pack 3 Kalender-SoH"
+                                                         },
+                                  "pack3_cycle_soh":  {
+                                                          "name":  "Pack 3 Zyklen-SoH"
+                                                      },
+                                  "pack3_accu_chg_energy_kwh":  {
+                                                                    "name":  "Pack 3 Lebensdauer-Ladeenergie"
+                                                                },
+                                  "pack3_accu_dsg_energy_kwh":  {
+                                                                    "name":  "Pack 3 Lebensdauer-Entladeenergie"
+                                                                },
+                                  "pack3_max_mos_temp_c":  {
+                                                               "name":  "Pack 3 MOSFET-Temperatur (max.)"
+                                                           },
+                                  "pack3_hv_mos_temp_c":  {
+                                                              "name":  "Pack 3 HV-MOSFET-Temperatur"
+                                                          },
+                                  "pack3_lv_mos_temp_c":  {
+                                                              "name":  "Pack 3 LV-MOSFET-Temperatur"
+                                                          },
+                                  "pack3_bus_voltage_v":  {
+                                                              "name":  "Pack 3 Busspannung"
+                                                          },
+                                  "pack3_ptc_temp_c":  {
+                                                           "name":  "Pack 3 PTC-Heizungstemperatur"
+                                                       },
+                                  "pack3_cell_max_vol_mv":  {
+                                                                "name":  "Pack 3 Zellspannung (max.)"
+                                                            },
+                                  "pack3_cell_min_vol_mv":  {
+                                                                "name":  "Pack 3 Zellspannung (min.)"
+                                                            },
+                                  "pack3_design_cap_mah":  {
+                                                               "name":  "Pack 3 Nennkapazität"
+                                                           },
+                                  "pack3_full_cap_mah":  {
+                                                             "name":  "Pack 3 Vollkapazität"
+                                                         },
+                                  "pack3_error_code":  {
+                                                           "name":  "Pack 3 Fehlercode"
+                                                       },
+                                  "pack4_soc":  {
+                                                    "name":  "Pack 4 SoC"
+                                                },
+                                  "pack4_power_w":  {
+                                                        "name":  "Pack 4 Leistung"
+                                                    },
+                                  "pack4_soh":  {
+                                                    "name":  "Pack 4 SoH"
+                                                },
+                                  "pack4_cycles":  {
+                                                       "name":  "Pack 4 Zyklen"
+                                                   },
+                                  "pack4_voltage_v":  {
+                                                          "name":  "Pack 4 Spannung"
+                                                      },
+                                  "pack4_current_a":  {
+                                                          "name":  "Pack 4 Strom"
+                                                      },
+                                  "pack4_remain_watth":  {
+                                                             "name":  "Pack 4 Restkapazität"
+                                                         },
+                                  "pack4_max_cell_temp_c":  {
+                                                                "name":  "Pack 4 Zelltemperatur (max.)"
+                                                            },
+                                  "pack4_min_cell_temp_c":  {
+                                                                "name":  "Pack 4 Zelltemperatur (min.)"
+                                                            },
+                                  "pack4_env_temp_c":  {
+                                                           "name":  "Pack 4 Umgebungstemperatur"
+                                                       },
+                                  "pack4_calendar_soh":  {
+                                                             "name":  "Pack 4 Kalender-SoH"
+                                                         },
+                                  "pack4_cycle_soh":  {
+                                                          "name":  "Pack 4 Zyklen-SoH"
+                                                      },
+                                  "pack4_accu_chg_energy_kwh":  {
+                                                                    "name":  "Pack 4 Lebensdauer-Ladeenergie"
+                                                                },
+                                  "pack4_accu_dsg_energy_kwh":  {
+                                                                    "name":  "Pack 4 Lebensdauer-Entladeenergie"
+                                                                },
+                                  "pack4_max_mos_temp_c":  {
+                                                               "name":  "Pack 4 MOSFET-Temperatur (max.)"
+                                                           },
+                                  "pack4_hv_mos_temp_c":  {
+                                                              "name":  "Pack 4 HV-MOSFET-Temperatur"
+                                                          },
+                                  "pack4_lv_mos_temp_c":  {
+                                                              "name":  "Pack 4 LV-MOSFET-Temperatur"
+                                                          },
+                                  "pack4_bus_voltage_v":  {
+                                                              "name":  "Pack 4 Busspannung"
+                                                          },
+                                  "pack4_ptc_temp_c":  {
+                                                           "name":  "Pack 4 PTC-Heizungstemperatur"
+                                                       },
+                                  "pack4_cell_max_vol_mv":  {
+                                                                "name":  "Pack 4 Zellspannung (max.)"
+                                                            },
+                                  "pack4_cell_min_vol_mv":  {
+                                                                "name":  "Pack 4 Zellspannung (min.)"
+                                                            },
+                                  "pack4_design_cap_mah":  {
+                                                               "name":  "Pack 4 Nennkapazität"
+                                                           },
+                                  "pack4_full_cap_mah":  {
+                                                             "name":  "Pack 4 Vollkapazität"
+                                                         },
+                                  "pack4_error_code":  {
+                                                           "name":  "Pack 4 Fehlercode"
+                                                       },
+                                  "pack5_soc":  {
+                                                    "name":  "Pack 5 SoC"
+                                                },
+                                  "pack5_power_w":  {
+                                                        "name":  "Pack 5 Leistung"
+                                                    },
+                                  "pack5_soh":  {
+                                                    "name":  "Pack 5 SoH"
+                                                },
+                                  "pack5_cycles":  {
+                                                       "name":  "Pack 5 Zyklen"
+                                                   },
+                                  "pack5_voltage_v":  {
+                                                          "name":  "Pack 5 Spannung"
+                                                      },
+                                  "pack5_current_a":  {
+                                                          "name":  "Pack 5 Strom"
+                                                      },
+                                  "pack5_remain_watth":  {
+                                                             "name":  "Pack 5 Restkapazität"
+                                                         },
+                                  "pack5_max_cell_temp_c":  {
+                                                                "name":  "Pack 5 Zelltemperatur (max.)"
+                                                            },
+                                  "pack5_min_cell_temp_c":  {
+                                                                "name":  "Pack 5 Zelltemperatur (min.)"
+                                                            },
+                                  "pack5_env_temp_c":  {
+                                                           "name":  "Pack 5 Umgebungstemperatur"
+                                                       },
+                                  "pack5_calendar_soh":  {
+                                                             "name":  "Pack 5 Kalender-SoH"
+                                                         },
+                                  "pack5_cycle_soh":  {
+                                                          "name":  "Pack 5 Zyklen-SoH"
+                                                      },
+                                  "pack5_accu_chg_energy_kwh":  {
+                                                                    "name":  "Pack 5 Lebensdauer-Ladeenergie"
+                                                                },
+                                  "pack5_accu_dsg_energy_kwh":  {
+                                                                    "name":  "Pack 5 Lebensdauer-Entladeenergie"
+                                                                },
+                                  "pack5_max_mos_temp_c":  {
+                                                               "name":  "Pack 5 MOSFET-Temperatur (max.)"
+                                                           },
+                                  "pack5_hv_mos_temp_c":  {
+                                                              "name":  "Pack 5 HV-MOSFET-Temperatur"
+                                                          },
+                                  "pack5_lv_mos_temp_c":  {
+                                                              "name":  "Pack 5 LV-MOSFET-Temperatur"
+                                                          },
+                                  "pack5_bus_voltage_v":  {
+                                                              "name":  "Pack 5 Busspannung"
+                                                          },
+                                  "pack5_ptc_temp_c":  {
+                                                           "name":  "Pack 5 PTC-Heizungstemperatur"
+                                                       },
+                                  "pack5_cell_max_vol_mv":  {
+                                                                "name":  "Pack 5 Zellspannung (max.)"
+                                                            },
+                                  "pack5_cell_min_vol_mv":  {
+                                                                "name":  "Pack 5 Zellspannung (min.)"
+                                                            },
+                                  "pack5_design_cap_mah":  {
+                                                               "name":  "Pack 5 Nennkapazität"
+                                                           },
+                                  "pack5_full_cap_mah":  {
+                                                             "name":  "Pack 5 Vollkapazität"
+                                                         },
+                                  "pack5_error_code":  {
+                                                           "name":  "Pack 5 Fehlercode"
+                                                       },
+                                  "ems_charge_upper_limit_pct":  {
+                                                                     "name":  "Ladeobergrenze"
+                                                                 },
+                                  "ems_discharge_lower_limit_pct":  {
+                                                                        "name":  "Entladeuntergrenze"
+                                                                    },
+                                  "ems_keep_soc_pct":  {
+                                                           "name":  "Backup-Reserve (EMS)"
+                                                       },
+                                  "ems_backup_ratio_pct":  {
+                                                               "name":  "Backup-Anteil"
+                                                           },
+                                  "mppt1_fault_code":  {
+                                                           "name":  "PV MPPT 1 Fehlercode"
+                                                       },
+                                  "mppt2_fault_code":  {
+                                                           "name":  "PV MPPT 2 Fehlercode"
+                                                       },
+                                  "pcs_ac_error_code":  {
+                                                            "name":  "Wechselrichter AC-Fehler"
+                                                        },
+                                  "pcs_dc_error_code":  {
+                                                            "name":  "Wechselrichter DC-Fehler"
+                                                        },
+                                  "pcs_ac_warning_code":  {
+                                                              "name":  "Wechselrichter AC-Warnung"
+                                                          },
+                                  "wifi_status":  {
+                                                      "name":  "WLAN-Status",
+                                                      "state":  {
+                                                                    "disconnected":  "Getrennt",
+                                                                    "connected":  "Verbunden"
+                                                                }
+                                                  },
+                                  "ethernet_status":  {
+                                                          "name":  "Ethernet-Status",
+                                                          "state":  {
+                                                                        "disconnected":  "Getrennt",
+                                                                        "connected":  "Verbunden"
+                                                                    }
+                                                      },
+                                  "cellular_status":  {
+                                                          "name":  "4G-Status",
+                                                          "state":  {
+                                                                        "disconnected":  "Getrennt",
+                                                                        "connected":  "Verbunden"
+                                                                    }
+                                                      },
+                                  "ems_led_brightness":  {
+                                                             "name":  "LED-Helligkeit"
+                                                         },
+                                  "ems_work_state":  {
+                                                         "name":  "Betriebszustand",
+                                                         "state":  {
+                                                                       "none":  "Kein Status",
+                                                                       "init":  "Initialisierung",
+                                                                       "idle":  "Leerlauf",
+                                                                       "startup_ext_bp":  "Start (Ext. Batterie)",
+                                                                       "startup_inner_bp":  "Start (Int. Batterie)",
+                                                                       "startup_pv":  "Start (PV)",
+                                                                       "startup_grid":  "Start (Netz)",
+                                                                       "running":  "Aktiv",
+                                                                       "stop":  "Gestoppt",
+                                                                       "maintain":  "Wartung"
+                                                                   }
+                                                     },
+                                  "ems_total_battery_capacity_wh":  {
+                                                                        "name":  "Gesamte Batteriekapazität"
+                                                                    },
+                                  "pcs_max_output_power_w":  {
+                                                                 "name":  "Wechselrichter Ausgangsleistung (max.)"
+                                                             },
+                                  "pcs_max_input_power_w":  {
+                                                                "name":  "Wechselrichter Eingangsleistung (max.)"
+                                                            },
+                                  "bp_max_charge_power_w":  {
+                                                                "name":  "Batterieladeleistung (max.)"
+                                                            },
+                                  "bp_max_discharge_power_w":  {
+                                                                   "name":  "Batterieentladeleistung (max.)"
+                                                               },
+                                  "anderson_out_w":  {
+                                                         "name":  "Anderson-Ausgang"
+                                                     },
+                                  "pv1_w":  {
+                                                "name":  "PV 1 Leistung"
+                                            },
+                                  "pv2_w":  {
+                                                "name":  "PV 2 Leistung"
+                                            },
+                                  "pv3_w":  {
+                                                "name":  "PV 3 Leistung"
+                                            },
+                                  "pv4_w":  {
+                                                "name":  "PV 4 Leistung"
+                                            },
+                                  "pv_voltage_v":  {
+                                                       "name":  "PV-Spannung"
+                                                   },
+                                  "home_from_solar_w":  {
+                                                            "name":  "Hausverbrauch aus Solar"
+                                                        },
+                                  "pv1_energy_kwh":  {
+                                                         "name":  "PV 1 Energie"
+                                                     },
+                                  "pv2_energy_kwh":  {
+                                                         "name":  "PV 2 Energie"
+                                                     },
+                                  "pv3_energy_kwh":  {
+                                                         "name":  "PV 3 Energie"
+                                                     },
+                                  "pv4_energy_kwh":  {
+                                                         "name":  "PV 4 Energie"
+                                                     },
+                                  "heating_power_w":  {
+                                                          "name":  "Heizleistung"
+                                                      },
+                                  "heating_energy_kwh":  {
+                                                             "name":  "Heizenergie"
+                                                         },
+                                  "target_power_w":  {
+                                                         "name":  "Zielleistung"
+                                                     },
+                                  "water_temperature_c":  {
+                                                              "name":  "Wassertemperatur"
+                                                          },
+                                  "target_temperature_c":  {
+                                                               "name":  "Zieltemperatur"
+                                                           },
+                                  "power_from_pv_w":  {
+                                                          "name":  "Leistung aus PV"
+                                                      },
+                                  "power_from_grid_w":  {
+                                                            "name":  "Leistung aus Netz"
+                                                        },
+                                  "power_from_battery_w":  {
+                                                               "name":  "Leistung aus Batterie"
+                                                           },
+                                  "water_tank_volume_l":  {
+                                                              "name":  "Wasserspeichervolumen"
+                                                          },
+                                  "self_check_pct":  {
+                                                         "name":  "Selbsttest-Fortschritt"
+                                                     },
+                                  "mode_raw":  {
+                                                   "name":  "Modus (roh)"
+                                               },
+                                  "run_flag_raw":  {
+                                                       "name":  "Lauf-Flag (roh)"
+                                                   },
+                                  "run_state_raw":  {
+                                                        "name":  "Betriebsstatus (roh)"
+                                                    },
+                                  "error_code_raw":  {
+                                                         "name":  "Fehlercode (roh)"
+                                                     }
+                              },
+                   "binary_sensor":  {
+                                         "ac_enabled":  {
+                                                            "name":  "AC aktiviert"
+                                                        },
+                                         "dc_out_enabled":  {
+                                                                "name":  "DC-Ausgang aktiviert"
+                                                            },
+                                         "car_12v_enabled":  {
+                                                                 "name":  "12V aktiviert"
+                                                             },
+                                         "ups_enabled":  {
+                                                             "name":  "USV aktiviert"
+                                                         },
+                                         "switch_state":  {
+                                                              "name":  "Relais"
+                                                          },
+                                         "ac_outlet_1_enabled":  {
+                                                                     "name":  "AC-Ausgang 1"
+                                                                 },
+                                         "ac_outlet_2_enabled":  {
+                                                                     "name":  "AC-Ausgang 2"
+                                                                 }
+                                     },
+                   "switch":  {
+                                  "ac_switch":  {
+                                                    "name":  "AC-Ausgang"
+                                                },
+                                  "dc_switch":  {
+                                                    "name":  "DC-Ausgang"
+                                                },
+                                  "car_12v_switch":  {
+                                                         "name":  "12V-Ausgang"
+                                                     },
+                                  "beeper_switch":  {
+                                                        "name":  "Signalton"
+                                                    },
+                                  "xboost_switch":  {
+                                                        "name":  "X-Boost"
+                                                    },
+                                  "ac_auto_on_switch":  {
+                                                            "name":  "AC Auto-Neustart"
+                                                        },
+                                  "backup_reserve_switch":  {
+                                                                "name":  "Backup-Reserve"
+                                                            },
+                                  "plug_switch":  {
+                                                      "name":  "Steckdose"
+                                                  },
+                                  "ac_out_switch":  {
+                                                        "name":  "AC-Ausgang"
+                                                    },
+                                  "ac2_out_switch":  {
+                                                         "name":  "AC-Ausgang 2"
+                                                     },
+                                  "dc_12v_out_switch":  {
+                                                            "name":  "12V-Ausgang"
+                                                        },
+                                  "energy_backup_switch":  {
+                                                               "name":  "Notstromreserve"
+                                                           },
+                                  "bypass_out_disable_switch":  {
+                                                                    "name":  "Bypass-Ausgang gesperrt"
+                                                                }
+                              },
+                   "number":  {
+                                  "ac_charge_speed":  {
+                                                          "name":  "AC-Ladegeschwindigkeit"
+                                                      },
+                                  "max_charge_soc":  {
+                                                         "name":  "Max. Ladezustand"
+                                                     },
+                                  "backup_reserve":  {
+                                                         "name":  "Backup-Reserve"
+                                                     },
+                                  "solar_surplus_threshold":  {
+                                                                  "name":  "Solarüberschuss-Schwelle"
+                                                              },
+                                  "standby_timeout":  {
+                                                          "name":  "Standby-Zeitlimit"
+                                                      },
+                                  "car_standby_timeout":  {
+                                                              "name":  "12V-Port Timeout"
+                                                          },
+                                  "screen_brightness":  {
+                                                            "name":  "Bildschirmhelligkeit"
+                                                        },
+                                  "screen_timeout":  {
+                                                         "name":  "Bildschirm-Timeout"
+                                                     },
+                                  "backup_reserve_soc":  {
+                                                             "name":  "Backup-Reserve Niveau"
+                                                         },
+                                  "led_brightness":  {
+                                                         "name":  "LED-Helligkeit"
+                                                     },
+                                  "max_watts":  {
+                                                    "name":  "Max. Leistungsgrenze"
+                                                },
+                                  "min_discharge_soc":  {
+                                                            "name":  "Entladegrenze"
+                                                        }
+                              },
+                   "select":  {
+                                  "work_mode":  {
+                                                    "name":  "Betriebsmodus",
+                                                    "state":  {
+                                                                  "self_use":  "Eigenstromversorgung",
+                                                                  "ai_schedule":  "Intelligenter Modus"
+                                                              }
+                                                }
+                              }
+               }
+}

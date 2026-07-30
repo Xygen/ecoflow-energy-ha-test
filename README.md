@@ -1,21 +1,23 @@
 <div align="center">
 
-# EcoFlow Energy for Home Assistant
+# EcoFlow Energy Test for Home Assistant
+
+> Test fork: this repository uses the independent Home Assistant domain
+> `ecoflow_energy_test`, so it can be installed alongside the original
+> `ecoflow_energy` integration. It adds read-only PowerGlow support for the
+> confirmed `HF33` (9 kW) serial family. No PowerGlow write commands are sent.
 
 **Real-time solar, battery, grid & home power monitoring.**
 **Energy Dashboard ready. Two modes: official API or real-time app connection.**
 
-[![HACS Default](https://img.shields.io/badge/HACS-Default-30D158?style=for-the-badge&logo=home-assistant&logoColor=white)](https://github.com/hacs/integration)
-[![GitHub Release](https://img.shields.io/github/v/release/shuette42/ecoflow-energy-ha?style=for-the-badge&color=30D158)](https://github.com/shuette42/ecoflow-energy-ha/releases)
-[![Tests](https://img.shields.io/github/actions/workflow/status/shuette42/ecoflow-energy-ha/tests.yml?branch=main&label=Tests&style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/shuette42/ecoflow-energy-ha/actions/workflows/tests.yml)
+Local test fork based on
+[shuette42/ecoflow-energy-ha](https://github.com/shuette42/ecoflow-energy-ha).
 
 <br>
 
 <img src="https://raw.githubusercontent.com/shuette42/ecoflow-energy-ha/main/images/energy-flow.png" alt="Energy Flow" width="280">&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/shuette42/ecoflow-energy-ha/main/images/energy-sources.png" alt="Energy Sources" width="340">
 
 <br>
-
-[![Add to Home Assistant](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=shuette42&repository=ecoflow-energy-ha&category=integration)
 
 </div>
 
@@ -40,6 +42,7 @@
 | | Sensors | Controls | Energy Sensors | Update Rate |
 |:---|:---:|:---:|:---:|:---|
 | **PowerOcean** — Home Battery | 208 | 2 numbers, 1 select (Enhanced only) | 6 (solar, grid, battery, home) | ~30 s standard / ~3 s enhanced |
+| **PowerGlow** (HF33) — Heating Rod | 14 read-only | None | 1 (heating) | ~30 s report polling |
 | **Delta 2 Max** — Portable Power | 94 | 7 switches, 8 numbers | 4 (solar 1+2, AC in/out) | ~30 s standard (+ MQTT push) |
 | **Delta 3 Max Plus** — Portable Power | 24 | 7 switches, 3 numbers | 4 (solar 1+2, AC in, output) | ~30 s standard / ~2 s enhanced |
 | **Smart Plug** — Switchable Outlet | 11 | 1 switch, 2 numbers | 1 (total energy) | ~30 s standard / ~3 s enhanced |
@@ -48,6 +51,15 @@
 > **Tip:** Other Delta-series devices (Delta Pro, Delta 2, etc.) should work automatically with the Delta sensor set. Base Delta 3 (non-Max-Plus) uses the Delta 3 sensor set. All Stream models (Ultra, Max, AC, Ultra X) share the Stream sensor set shown above.
 >
 > **Note:** Every device additionally exposes 2 universal diagnostic sensors (connection status and active mode) that are not included in the sensor counts above.
+
+<details>
+<summary><b>PowerGlow (HF33)</b> — read-only heating-rod telemetry</summary>
+
+Heating power and locally integrated heating energy · target power · current and target water temperature · power contribution from PV, grid, and battery · tank volume · self-check progress · optional raw numeric diagnostics for mode, run flag, run state, and error code.
+
+`heatingPower` from the parameter/HTTP report and `hrPwr` from `JTS1_HEATING_ROD_ENERGY_STREAM_REPORT` are two sources for the same Home Assistant sensor. When both are available, `hrPwr` wins and `heatingPower` remains the polling fallback. Enhanced mode reads the confirmed reports through the associated PowerOcean parent and verifies `hrSn` when present. Direct HF33 frames remain diagnostics-only until their wire protocol is confirmed. No switch, number, select, or other PowerGlow write command is implemented.
+
+</details>
 
 <details>
 <summary><b>PowerOcean</b> — 3-phase grid, MPPT tracking, multi-pack battery, EMS diagnostics, energy strategy controls</summary>
@@ -95,20 +107,26 @@ The Stream AC Pro is treated as an AC-coupled battery. House/grid/solar flow val
 
 ### 1. Install
 
-[![Add to Home Assistant](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=shuette42&repository=ecoflow-energy-ha&category=integration)
-
-Or: **HACS** > **Integrations** > **Explore & Download** > search **EcoFlow Energy** > **Download** > restart HA.
+This test fork is not part of the HACS default store. Install it manually from
+the supplied ZIP, or publish the complete fork in a GitHub repository and add
+that repository to HACS as a custom integration.
 
 <details>
 <summary>Manual installation</summary>
 
-Download the [latest release](https://github.com/shuette42/ecoflow-energy-ha/releases), copy `custom_components/ecoflow_energy/` to your HA `config/custom_components/`, restart.
+Download this repository (or the supplied ZIP), copy
+`custom_components/ecoflow_energy_test/` to your HA
+`config/custom_components/ecoflow_energy_test/`, then restart Home Assistant.
+
+For HACS, first publish this complete fork in your own GitHub repository. In
+HACS open **Custom repositories**, add that repository URL with category
+**Integration**, download **EcoFlow Energy Test**, and restart Home Assistant.
 
 </details>
 
 ### 2. Configure
 
-**Settings > Devices & Services > Add Integration** > search **EcoFlow Energy** > choose your mode:
+**Settings > Devices & Services > Add Integration** > search **EcoFlow Energy Test** > choose your mode:
 
 | | Standard | Enhanced |
 |:---|:---|:---|
@@ -329,9 +347,9 @@ automation:
 ## How It Compares
 
 <details>
-<summary><b>EcoFlow Energy vs other integrations</b></summary>
+<summary><b>EcoFlow Energy Test vs other integrations</b></summary>
 
-| | EcoFlow Energy | Others |
+| | EcoFlow Energy Test | Others |
 |:---|:---|:---|
 | Data source | MQTT push + HTTP fallback | HTTP only or basic MQTT |
 | Portal login | Not required | Required |
@@ -355,7 +373,7 @@ automation:
 
 - Devices must be online in the EcoFlow app
 - Verify Access Key and Secret Key from the Developer Portal
-- Check **Settings > System > Logs** for `ecoflow_energy`
+- Check **Settings > System > Logs** for `ecoflow_energy_test`
 
 </details>
 
@@ -372,7 +390,7 @@ automation:
 
 Use the integration menu (not the options dialog):
 
-**Settings > Devices & Services > EcoFlow Energy > 3-dot menu > Reconfigure**
+**Settings > Devices & Services > EcoFlow Energy Test > 3-dot menu > Reconfigure**
 
 - German UI label: **Neu konfigurieren**
 - This opens the manual credential update flow for Access Key / Secret Key (and Enhanced credentials if enabled)
@@ -414,7 +432,7 @@ Since v1.8.3, the integration handles this gracefully: error 1006 is logged once
 <details>
 <summary><b>Download diagnostics</b></summary>
 
-**Settings > Devices & Services > EcoFlow Energy > 3-dot menu > Download Diagnostics** — connection status, data freshness, no credentials exposed.
+**Settings > Devices & Services > EcoFlow Energy Test > 3-dot menu > Download Diagnostics** — connection status, data freshness, no credentials exposed.
 
 </details>
 
@@ -422,7 +440,7 @@ Since v1.8.3, the integration handles this gracefully: error 1006 is logged once
 
 <div align="center">
 
-**MIT License** — [Contributing](https://github.com/shuette42/ecoflow-energy-ha/issues) welcome
+**MIT License** — contributions to a separately published test repository are welcome
 
 Made by [huette.ai](https://huette.ai) — When it has to work.
 

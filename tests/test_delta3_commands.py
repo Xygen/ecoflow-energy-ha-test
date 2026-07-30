@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from custom_components.ecoflow_energy.ecoflow.delta3_commands import (
+from ecoflow_energy_test.ecoflow.delta3_commands import (
     DELTA3_NUMBER_PARAMS,
     DELTA3_SWITCH_PARAMS,
     build_number_command,
@@ -17,10 +17,10 @@ from custom_components.ecoflow_energy.ecoflow.delta3_commands import (
     build_switch_command,
     parse_config_write_ack,
 )
-from custom_components.ecoflow_energy.ecoflow.proto.decoder import (
+from ecoflow_energy_test.ecoflow.proto.decoder import (
     decode_header_message,
 )
-from custom_components.ecoflow_energy.ecoflow.proto_encoding import (
+from ecoflow_energy_test.ecoflow.proto_encoding import (
     encode_field_bytes,
     encode_field_varint,
 )

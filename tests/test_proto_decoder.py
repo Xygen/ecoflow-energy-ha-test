@@ -5,21 +5,21 @@ import importlib.machinery
 import logging
 import sys
 
-from ecoflow_energy.ecoflow.energy_stream import (
+from ecoflow_energy_test.ecoflow.energy_stream import (
     build_energy_stream_activate_payload,
     build_energy_stream_deactivate_payload,
 )
-from ecoflow_energy.ecoflow.proto_encoding import (
+from ecoflow_energy_test.ecoflow.proto_encoding import (
     encode_field_bytes,
     encode_field_varint,
 )
-from ecoflow_energy.ecoflow.proto.decoder import decode_header_message
-from ecoflow_energy.ecoflow.proto.ecocharge_pb2 import (
+from ecoflow_energy_test.ecoflow.proto.decoder import decode_header_message
+from ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import (
     JTS1EmsChangeReport,
     JTS1EmsHeartbeat,
     JTS1EnergyStreamReport,
 )
-from ecoflow_energy.ecoflow.proto.runtime import (
+from ecoflow_energy_test.ecoflow.proto.runtime import (
     _build_cmd_registry,
     decode_proto_runtime_frame,
 )
@@ -120,7 +120,7 @@ class TestRuntimeDecoder:
         to detect cloud-only app changes that bypass the EMS-side
         sys_bat_backup_ratio.
         """
-        from custom_components.ecoflow_energy.ecoflow.proto.ecocharge_pb2 import (
+        from ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import (
             JTS1EmsParamChangeReport,
         )
         msg = JTS1EmsParamChangeReport()
@@ -160,8 +160,8 @@ class TestProtobufImportFailure:
 
     def test_build_cmd_registry_logs_warning_on_import_failure(self, caplog):
         """When protobuf pb2 module cannot be imported, a warning must be logged."""
-        pb2_key = "ecoflow_energy.ecoflow.proto.ecocharge_pb2"
-        proto_pkg_key = "ecoflow_energy.ecoflow.proto"
+        pb2_key = "ecoflow_energy_test.ecoflow.proto.ecoflow_energy_test_pb2"
+        proto_pkg_key = "ecoflow_energy_test.ecoflow.proto"
 
         # Save and remove the cached pb2 module from sys.modules
         saved_module = sys.modules.pop(pb2_key, None)
@@ -169,10 +169,10 @@ class TestProtobufImportFailure:
         # Remove the attribute from the parent package so Python cannot
         # short-circuit the import via the package namespace.
         proto_pkg = sys.modules.get(proto_pkg_key)
-        had_attr = hasattr(proto_pkg, "ecocharge_pb2")
+        had_attr = hasattr(proto_pkg, "ecoflow_energy_test_pb2")
         if had_attr:
-            saved_attr = getattr(proto_pkg, "ecocharge_pb2")
-            delattr(proto_pkg, "ecocharge_pb2")
+            saved_attr = getattr(proto_pkg, "ecoflow_energy_test_pb2")
+            delattr(proto_pkg, "ecoflow_energy_test_pb2")
 
         # Install a blocking meta path finder (modern find_spec API) that
         # raises ImportError before file-system finders locate the .py on disk.
@@ -189,7 +189,7 @@ class TestProtobufImportFailure:
         try:
             with caplog.at_level(
                 logging.WARNING,
-                logger="ecoflow_energy.ecoflow.proto.runtime",
+                logger="ecoflow_energy_test.ecoflow.proto.runtime",
             ):
                 result = _build_cmd_registry()
 
@@ -201,7 +201,7 @@ class TestProtobufImportFailure:
             if saved_module is not None:
                 sys.modules[pb2_key] = saved_module
             if had_attr:
-                setattr(proto_pkg, "ecocharge_pb2", saved_attr)
+                setattr(proto_pkg, "ecoflow_energy_test_pb2", saved_attr)
 
 
 class TestDecoderMalformedInput:

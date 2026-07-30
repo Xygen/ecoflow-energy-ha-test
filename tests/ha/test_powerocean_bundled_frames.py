@@ -4,8 +4,8 @@ from unittest.mock import patch
 
 import pytest
 
-from custom_components.ecoflow_energy.coordinator.mqtt_ingest import MqttIngestMixin
-from custom_components.ecoflow_energy.ecoflow.proto.ecocharge_pb2 import (
+from custom_components.ecoflow_energy_test.coordinator.mqtt_ingest import MqttIngestMixin
+from custom_components.ecoflow_energy_test.ecoflow.proto.ecocharge_pb2 import (
     JTS1BpHeartbeatReport,
     JTS1EmsChangeReport,
     JTS1EmsHeartbeat,
@@ -13,7 +13,7 @@ from custom_components.ecoflow_energy.ecoflow.proto.ecocharge_pb2 import (
     JTS1EmsPVInvEnergyStreamReport,
     JTS1EnergyStreamReport,
 )
-from custom_components.ecoflow_energy.ecoflow.proto_encoding import (
+from custom_components.ecoflow_energy_test.ecoflow.proto_encoding import (
     encode_field_bytes,
     encode_field_varint,
 )
@@ -201,7 +201,7 @@ def test_one_bad_header_keeps_the_rest_of_the_bundle() -> None:
     )
 
     with patch(
-        "custom_components.ecoflow_energy.coordinator.mqtt_ingest."
+        "custom_components.ecoflow_energy_test.coordinator.mqtt_ingest."
         "flatten_heartbeat",
         side_effect=ValueError("bad header"),
     ):
